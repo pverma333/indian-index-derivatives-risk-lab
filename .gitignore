@@ -1,0 +1,19 @@
+# OS / editor junk
+.DS_Store
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data folders (rely on local data; repo only has code)
+data/raw/
+data/processed/
