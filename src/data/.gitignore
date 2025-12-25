@@ -1,1 +1,3 @@
-# Keep folder in Git, data files will be handled in subfolders
+# Ignore processed data files
+*.csv
+*.parquet
