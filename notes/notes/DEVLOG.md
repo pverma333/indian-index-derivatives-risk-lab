@@ -21,3 +21,22 @@
   - Options: monthly expiry classified as max expiry per (Symbol, Year-Month); others weekly (no DTE heuristics).
   - Writes parquet + csv outputs and enforces core invariants via assertions.
 - Added unit tests in `tests/test_map_trade_calendar.py`.
+
+```md
+## 2025-12-26 - Market Environment & Treasury Curve Construction (#12)
+
+### Added
+- `src/data/build_market_env_treasury.py`
+  - Builds `market_data.parquet` (spot + VIX + dividend yields; controlled ffill up to 5 days)
+  - Builds `treasury_curve.parquet` (91D/182D/364D; percent -> decimal; calendar-day global ffill)
+
+### Notes
+- Parquet writing is stabilized via stable sort, fixed dtypes, and stripped schema metadata for repeatable outputs.
+- Fixed dividend yield ingestion to handle trailing-space headers and `Div Yield%` naming variant.
+- Added regression test using temp CSV mirroring raw header formatting.
+
+### Tested
+- percent -> decimal conversion
+- VIX ffill limit enforcement
+- stable parquet write (bit-identical within same environment)
+
