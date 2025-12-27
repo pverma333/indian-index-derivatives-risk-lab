@@ -17,3 +17,5 @@ env/
 # Data folders (rely on local data; repo only has code)
 data/raw/
 data/processed/
+data/curated
+
