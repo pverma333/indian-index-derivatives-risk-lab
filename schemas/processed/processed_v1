@@ -1,0 +1,90 @@
+### File: Index_Spot_Prices.csv
+**Path:** `data/processed/Index_Spot_Prices.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Date | object |
+| Index | object |
+| Open | object |
+| High | object |
+| Low | object |
+| Close | object |
+
+---
+### File: trade_calendar.parquet
+**Path:** `data/processed/trade_calendar.parquet`
+
+| Column | Data Type |
+| --- | --- |
+| TradeDate | datetime64[ns] |
+| Symbol | object |
+| Fut_Near_Expiry | datetime64[ns] |
+| Fut_Next_Expiry | datetime64[ns] |
+| Fut_Far_Expiry | datetime64[ns] |
+| Opt_Weekly_Expiry | datetime64[ns] |
+| Opt_Monthly_Expiry | datetime64[ns] |
+
+---
+### File: lot_size_map.parquet
+**Path:** `data/processed/lot_size_map.parquet`
+
+| Column | Data Type |
+| --- | --- |
+| symbol | object |
+| start_date | datetime64[ns] |
+| end_date | datetime64[ns] |
+| lot_size | int64 |
+
+---
+### File: market_data.parquet
+**Path:** `data/processed/market_data.parquet`
+
+| Column | Data Type |
+| --- | --- |
+| date | object |
+| index_name | object |
+| spot_close | float64 |
+| vix_close | float64 |
+| div_yield | float64 |
+
+---
+### File: India_VIX_Historical.csv
+**Path:** `data/processed/India_VIX_Historical.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Date | object |
+| VIX_Close | object |
+
+---
+### File: treasury_curve.parquet
+**Path:** `data/processed/treasury_curve.parquet`
+
+| Column | Data Type |
+| --- | --- |
+| date | object |
+| tenor | object |
+| rate | float64 |
+
+---
+### File: Nifty_Historical_Derivatives.csv
+**Path:** `data/processed/Nifty_Historical_Derivatives.csv`
+
+| Column | Data Type |
+| --- | --- |
+| INSTRUMENT | object |
+| SYMBOL | object |
+| EXPIRY_DT | object |
+| STRIKE_PR | object |
+| OPTION_TYP | object |
+| OPEN | object |
+| HIGH | object |
+| LOW | object |
+| CLOSE | object |
+| SETTLE_PR | object |
+| CONTRACTS | object |
+| OPEN_INT | object |
+| CHG_IN_OI | object |
+| TIMESTAMP | object |
+
+---
