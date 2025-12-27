@@ -88,3 +88,53 @@
 | TIMESTAMP | object |
 
 ---
+
+
+Goal for later
+{
+  "dataset": "golden_derivatives",
+  "description": "Enriched NIFTY / BANKNIFTY derivatives EOD data with spot, expiry, and lot metadata",
+  "grain": ["trade_date", "symbol", "instrument", "expiry_date", "strike_price", "option_type"],
+  "columns": [
+    {
+      "name": "trade_date",
+      "type": "date",
+      "nullable": false,
+      "description": "Trading date (YYYY-MM-DD)"
+    },
+    {
+      "name": "symbol",
+      "type": "string",
+      "nullable": false,
+      "allowed_values": ["NIFTY", "BANKNIFTY"]
+    },
+    {
+      "name": "instrument",
+      "type": "string",
+      "allowed_values": ["FUTIDX", "OPTIDX"]
+    },
+    {
+      "name": "expiry_date",
+      "type": "date",
+      "nullable": false
+    },
+    {
+      "name": "strike_price",
+      "type": "float",
+      "nullable": false,
+      "notes": "Always 0.0 for futures"
+    },
+    {
+      "name": "settle_price",
+      "type": "float",
+      "nullable": false,
+      "description": "Clearing price used for MTM"
+    }
+  ],
+  "quality_checks": {
+    "not_null": ["trade_date", "symbol", "expiry_date", "settle_price"],
+    "uniqueness": ["trade_date", "symbol", "instrument", "expiry_date", "strike_price", "option_type"]
+  },
+  "ownership": "quant-risk-lab",
+  "version": "v1.0"
+}

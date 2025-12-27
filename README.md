@@ -29,3 +29,10 @@ Run:
 ```bash
 python src/data/build_market_env_treasury.py
 
+### Curated Derivatives (Golden Source)
+
+Build the curated derivatives dataset (joined spot/VIX, lot sizes, treasury rates, expiry context, and TTE metrics):
+
+```bash
+python -m src.data.build_derivatives_curated
+

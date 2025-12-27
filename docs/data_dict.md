@@ -320,4 +320,56 @@
 | P/B  | object |
 | Div Yield%  | object |
 
----
+
+## derivatives_clean.parquet — Data Dictionary
+**Path:** `data/curated/derivatives_clean.parquet`
+| Column                 |           Type | Description                                                                           |
+| ---------------------- | -------------: | ------------------------------------------------------------------------------------- |
+| date                   | datetime64[ns] | Trading date (normalized) derived from `timestamp`                                    |
+| timestamp              | datetime64[ns] | Same as `date` (normalized) retained for clarity                                      |
+| symbol                 |         string | Normalized symbol (`NIFTY`, `BANKNIFTY`)                                              |
+| instrument             |         string | `FUTIDX` or `OPTIDX`                                                                  |
+| expiry_dt              | datetime64[ns] | Contract expiry date (normalized)                                                     |
+| expiry_rank            |          int16 | Dense rank of `expiry_dt` ascending per `[date,symbol,instrument]` (1=Near)           |
+| strike_pr              |        float64 | Strike; **forced to `0.0` for FUTIDX**                                                |
+| option_typ             |         string | Option type (`CE`/`PE`) for OPTIDX; blank for FUTIDX                                  |
+| open/high/low/close    |        float64 | OHLC from raw                                                                         |
+| settle_pr              |        float64 | Settlement price from raw                                                             |
+| contracts              |        float64 | Contracts/volume from raw (kept float64 for uniformity)                               |
+| open_int               |        float64 | Open interest                                                                         |
+| chg_in_oi              |        float64 | Change in OI                                                                          |
+| spot_close             |        float64 | Spot close joined from `market_data.parquet`                                          |
+| vix_close              |        float64 | India VIX close joined from `market_data.parquet`                                     |
+| div_yield              |        float64 | Dividend yield joined from `market_data.parquet` (if present)                         |
+| lot_size               |          int64 | Lot size resolved from `lot_size_map.parquet` by effective date range                 |
+| rate_91d               |        float64 | 91-day treasury rate (decimal)                                                        |
+| rate_182d              |        float64 | 182-day treasury rate (decimal)                                                       |
+| rate_364d              |        float64 | 364-day treasury rate (decimal)                                                       |
+| cal_days_to_expiry     |          int32 | Calendar days between `date` and `expiry_dt`                                          |
+| trading_days_to_expiry |          int32 | Count of trading days in `(date, expiry_dt]` from `trade_calendar.parquet`            |
+| is_opt_weekly_expiry   |           bool | `expiry_dt == Opt_Weekly_Expiry` for that `[date,symbol]`                             |
+| is_opt_monthly_expiry  |           bool | `expiry_dt == Opt_Monthly_Expiry` for that `[date,symbol]`                            |
+| moneyness              |        float64 | OPTIDX only: Calls=`spot_close-strike_pr`, Puts=`strike_pr-spot_close` (ITM positive) |
+
+
+
+
+Important date / field consideration
+
+- nifty_historical_derivatives -
+----> expiry_dt  = dd-mmm-yyyy
+----> timestamp = yyyy-mm-dd
+
+- trade_Calendar.parquet -
+----> all columns datetimstamp in format - yyyy-mm-dd 00:00:00
+
+-lot_size.parquet -
+----> all date columns datetimestamp in format - yyyy-mm-dd 00:00:00
+
+- market_data.parquet -
+----> date - yyyy-mm-dd format
+----> div yeild - percentage converted to decimal so # in decimals
+
+- treasury_data.parquet -
+-----> date - yyyy-mm-dd format
+-----> rate - percentage converted to decimal so # in decimals

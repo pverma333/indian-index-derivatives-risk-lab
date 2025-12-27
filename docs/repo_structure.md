@@ -1,5 +1,6 @@
-indian-index-derivatives-risk-lab
+── indian-index-derivatives-risk-lab
 │   │       ├── data
+│   │       │   ├── curated
 │   │       │   ├── processed
 │   │       │   │   ├── Index_Spot_Prices.csv
 │   │       │   │   ├── India_VIX_Historical.csv
@@ -30,12 +31,12 @@ indian-index-derivatives-risk-lab
 │   │       │       └── trade_calendar.csv
 │   │       ├── notebooks
 │   │       ├── notes
-│   │       │   └── notes
+│   │       │   └── notes
 │   │       │       ├── DEVLOG.md
 │   │       │       └── requirements.txt
 │   │       ├── README.md
 │   │       ├── schemas
-│   │       │   ├── golden
+│   │       │   ├── curated
 │   │       │   ├── processed
 │   │       │   └── raw
 │   │       ├── src
@@ -62,5 +63,3 @@ indian-index-derivatives-risk-lab
 │   │               ├── mock_derivatives.csv
 │   │               ├── trade_calendar.csv
 │   │               └── trade_calendar.parquet
-│   │       └── generate_schema.py
-│   │  

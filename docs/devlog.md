@@ -40,3 +40,17 @@
 - VIX ffill limit enforcement
 - stable parquet write (bit-identical within same environment)
 
+
+### 2025-12-27
+## Phase 1.2 – Curated “Golden Source” derivatives layer
+
+- Added curated derivatives ETL: `src/data/build_derivatives_curated.py`
+  - Reads `Nifty_Historical_Derivatives.csv` in chunks, filters to FUTIDX/OPTIDX and NIFTY/BANKNIFTY
+  - Normalizes schema (snake_case), parses mixed date formats without dayfirst=True, casts numerics to float64
+  - Enriches with spot/VIX (market_data), lot_size (range join), treasury curve (pivot to 91/182/364d, decimals), and trade_calendar expiry context
+  - Computes `cal_days_to_expiry`, `trading_days_to_expiry`, `expiry_rank`, and `moneyness`
+  - Writes `data/curated/derivatives_clean.parquet`
+- Tests:
+  - Added `tests/test_build_derivatives_curated.py` end-to-end fixture covering joins, strike=0 for futures, rates-as-decimals, expiry_rank, moneyness, and TTE invariants
+
+

@@ -1,0 +1,264 @@
+{
+  "dataset": "derivatives_clean",
+  "description": "Curated NIFTY / BANKNIFTY derivatives EOD dataset enriched with spot close, India VIX, effective-dated lot size, treasury curve rates, expiry context, and time-to-expiry metrics for backtests and Greeks.",
+  "grain": [
+    "date",
+    "symbol",
+    "instrument",
+    "expiry_dt",
+    "strike_pr",
+    "option_typ"
+  ],
+  "columns": [
+    {
+      "name": "date",
+      "type": "date",
+      "nullable": false,
+      "description": "Trading date derived from TIMESTAMP (normalized to YYYY-MM-DD)"
+    },
+    {
+      "name": "timestamp",
+      "type": "date",
+      "nullable": false,
+      "description": "Original TIMESTAMP parsed and normalized to YYYY-MM-DD"
+    },
+    {
+      "name": "symbol",
+      "type": "string",
+      "nullable": false,
+      "allowed_values": [
+        "NIFTY",
+        "BANKNIFTY"
+      ],
+      "description": "Underlying index symbol"
+    },
+    {
+      "name": "instrument",
+      "type": "string",
+      "nullable": false,
+      "allowed_values": [
+        "FUTIDX",
+        "OPTIDX"
+      ],
+      "description": "Derivative instrument family"
+    },
+    {
+      "name": "expiry_dt",
+      "type": "date",
+      "nullable": false,
+      "description": "Contract expiry date parsed from mixed formats and normalized"
+    },
+    {
+      "name": "strike_pr",
+      "type": "float",
+      "nullable": false,
+      "notes": "Always 0.0 for FUTIDX",
+      "description": "Strike price for options; forced to 0.0 for futures"
+    },
+    {
+      "name": "option_typ",
+      "type": "string",
+      "nullable": true,
+      "allowed_values": [
+        "CE",
+        "PE",
+        "",
+        null
+      ],
+      "description": "Option type for OPTIDX (CE/PE); blank/null for futures depending on source data"
+    },
+    {
+      "name": "open",
+      "type": "float",
+      "nullable": false,
+      "description": "EOD open price"
+    },
+    {
+      "name": "high",
+      "type": "float",
+      "nullable": false,
+      "description": "EOD high price"
+    },
+    {
+      "name": "low",
+      "type": "float",
+      "nullable": false,
+      "description": "EOD low price"
+    },
+    {
+      "name": "close",
+      "type": "float",
+      "nullable": false,
+      "description": "EOD close price"
+    },
+    {
+      "name": "settle_pr",
+      "type": "float",
+      "nullable": false,
+      "description": "Settlement price used for MTM"
+    },
+    {
+      "name": "contracts",
+      "type": "float",
+      "nullable": false,
+      "description": "Number of contracts traded (float64 for consistency)"
+    },
+    {
+      "name": "open_int",
+      "type": "float",
+      "nullable": false,
+      "description": "Open interest (float64 for consistency)"
+    },
+    {
+      "name": "chg_in_oi",
+      "type": "float",
+      "nullable": false,
+      "description": "Change in open interest (float64 for consistency)"
+    },
+    {
+      "name": "spot_close",
+      "type": "float",
+      "nullable": false,
+      "description": "Underlying spot close joined from market_data.parquet"
+    },
+    {
+      "name": "vix_close",
+      "type": "float",
+      "nullable": false,
+      "description": "India VIX close joined from market_data.parquet"
+    },
+    {
+      "name": "div_yield",
+      "type": "float",
+      "nullable": true,
+      "description": "Dividend yield joined from market_data.parquet (if present)"
+    },
+    {
+      "name": "lot_size",
+      "type": "integer",
+      "nullable": false,
+      "description": "Contract lot size resolved from lot_size_map.parquet using effective-dated mapping"
+    },
+    {
+      "name": "end_date",
+      "type": "date",
+      "nullable": true,
+      "description": "Lot size end date from lot_size_map; null indicates current/latest mapping"
+    },
+    {
+      "name": "rate_91d",
+      "type": "float",
+      "nullable": false,
+      "description": "91-day treasury rate as decimal (e.g., 0.07 for 7%)"
+    },
+    {
+      "name": "rate_182d",
+      "type": "float",
+      "nullable": false,
+      "description": "182-day treasury rate as decimal (e.g., 0.07 for 7%)"
+    },
+    {
+      "name": "rate_364d",
+      "type": "float",
+      "nullable": false,
+      "description": "364-day treasury rate as decimal (e.g., 0.07 for 7%)"
+    },
+    {
+      "name": "cal_days_to_expiry",
+      "type": "integer",
+      "nullable": false,
+      "description": "Calendar days between date and expiry_dt; rows with negative values are dropped"
+    },
+    {
+      "name": "trading_days_to_expiry",
+      "type": "integer",
+      "nullable": false,
+      "description": "Count of trading days strictly after date and <= expiry_dt using trade_calendar.parquet"
+    },
+    {
+      "name": "expiry_rank",
+      "type": "integer",
+      "nullable": false,
+      "description": "Dense rank of expiry_dt per (date, symbol, instrument): 1=near, 2=next, 3=far..."
+    },
+    {
+      "name": "moneyness",
+      "type": "float",
+      "nullable": true,
+      "description": "Options-only: Calls=spot_close - strike_pr; Puts=strike_pr - spot_close; null for FUTIDX"
+    },
+    {
+      "name": "opt_weekly_expiry",
+      "type": "date",
+      "nullable": true,
+      "description": "Weekly option expiry date for that trade date from trade_calendar.parquet (nullable for holidays/weekends)"
+    },
+    {
+      "name": "opt_monthly_expiry",
+      "type": "date",
+      "nullable": true,
+      "description": "Monthly option expiry date for that trade date from trade_calendar.parquet (nullable for holidays/weekends)"
+    },
+    {
+      "name": "is_trade_calendar_date",
+      "type": "boolean",
+      "nullable": false,
+      "description": "True if (date, symbol) exists in trade_calendar.parquet; false indicates holiday/weekend/missing mapping"
+    },
+    {
+      "name": "is_trading_day",
+      "type": "boolean",
+      "nullable": false,
+      "description": "True if date is present in the trading calendar for that symbol; false indicates holiday/weekend"
+    },
+    {
+      "name": "is_opt_weekly_expiry",
+      "type": "boolean",
+      "nullable": false,
+      "description": "True if expiry_dt equals opt_weekly_expiry for that (date, symbol)"
+    },
+    {
+      "name": "is_opt_monthly_expiry",
+      "type": "boolean",
+      "nullable": false,
+      "description": "True if expiry_dt equals opt_monthly_expiry for that (date, symbol)"
+    }
+  ],
+  "quality_checks": {
+    "not_null": [
+      "date",
+      "symbol",
+      "instrument",
+      "expiry_dt",
+      "strike_pr",
+      "settle_pr",
+      "spot_close",
+      "vix_close",
+      "lot_size",
+      "rate_91d",
+      "rate_182d",
+      "rate_364d",
+      "cal_days_to_expiry",
+      "trading_days_to_expiry",
+      "expiry_rank",
+      "is_trade_calendar_date",
+      "is_trading_day"
+    ],
+    "constraints": [
+      "instrument in {FUTIDX, OPTIDX}",
+      "symbol in {NIFTY, BANKNIFTY}",
+      "strike_pr == 0.0 when instrument == FUTIDX",
+      "cal_days_to_expiry >= 0"
+    ],
+    "uniqueness": [
+      "date",
+      "symbol",
+      "instrument",
+      "expiry_dt",
+      "strike_pr",
+      "option_typ"
+    ]
+  },
+  "ownership": "quant-risk-lab",
+  "version": "v1.0"
+}
