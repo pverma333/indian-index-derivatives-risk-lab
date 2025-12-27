@@ -1,0 +1,232 @@
+### File: NIFTY BANK-yield-01-01-2023-to-31-12-2023.csv
+**Path:** `data/raw/NIFTY BANK-yield-01-01-2023-to-31-12-2023.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY 50-yield-01-01-2024-to-31-12-2024.csv
+**Path:** `data/raw/NIFTY 50-yield-01-01-2024-to-31-12-2024.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY BANK-yield-01-01-2025-to-19-12-2025.csv
+**Path:** `data/raw/NIFTY BANK-yield-01-01-2025-to-19-12-2025.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY 50-yield-01-01-2020-to-31-12-2020.csv
+**Path:** `data/raw/NIFTY 50-yield-01-01-2020-to-31-12-2020.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY BANK-yield-01-01-2022-to-31-12-2022.csv
+**Path:** `data/raw/NIFTY BANK-yield-01-01-2022-to-31-12-2022.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY 50-yield-01-01-2021-to-31-12-2021.csv
+**Path:** `data/raw/NIFTY 50-yield-01-01-2021-to-31-12-2021.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: 3-MonBondYield.csv
+**Path:** `data/raw/3-MonBondYield.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Date | object |
+| Price | object |
+| Open | object |
+| High | object |
+| Low | object |
+| Change % | object |
+
+---
+### File: lot_size_map.csv
+**Path:** `data/raw/lot_size_map.csv`
+
+| Column | Data Type |
+| --- | --- |
+| symbol | object |
+| start_date | object |
+| end_date | object |
+| lot_size | object |
+
+---
+### File: NIFTY 50-yield-01-01-2022-to-31-12-2022.csv
+**Path:** `data/raw/NIFTY 50-yield-01-01-2022-to-31-12-2022.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: trade_calendar.csv
+**Path:** `data/raw/trade_calendar.csv`
+
+| Column | Data Type |
+| --- | --- |
+| TradeDate | object |
+| Symbol | object |
+| Fut_Near_Expiry | object |
+| Fut_Next_Expiry | object |
+| Fut_Far_Expiry | object |
+| Opt_Weekly_Expiry | object |
+| Opt_Monthly_Expiry | object |
+
+---
+### File: 6-MonBondYield.csv
+**Path:** `data/raw/6-MonBondYield.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Date | object |
+| Price | object |
+| Open | object |
+| High | object |
+| Low | object |
+| Change % | object |
+
+---
+### File: NIFTY BANK-yield-01-01-2021-to-31-12-2021.csv
+**Path:** `data/raw/NIFTY BANK-yield-01-01-2021-to-31-12-2021.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY 50-yield-01-01-2023-to-31-12-2023.csv
+**Path:** `data/raw/NIFTY 50-yield-01-01-2023-to-31-12-2023.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY BANK-yield-01-01-2020-to-31-12-2020.csv
+**Path:** `data/raw/NIFTY BANK-yield-01-01-2020-to-31-12-2020.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY 50-yield-01-01-2025-to-19-12-2025.csv
+**Path:** `data/raw/NIFTY 50-yield-01-01-2025-to-19-12-2025.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY BANK-yield-01-01-2024-to-31-12-2024.csv
+**Path:** `data/raw/NIFTY BANK-yield-01-01-2024-to-31-12-2024.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: NIFTY 50-yield-01-07-2019-to-31-12-2019.csv
+**Path:** `data/raw/NIFTY 50-yield-01-07-2019-to-31-12-2019.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
+### File: 1-YearBondYield.csv
+**Path:** `data/raw/1-YearBondYield.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Date | object |
+| Price | object |
+| Open | object |
+| High | object |
+| Low | object |
+| Change % | object |
+
+---
+### File: NIFTY BANK-yield-01-07-2019-to-31-12-2019.csv
+**Path:** `data/raw/NIFTY BANK-yield-01-07-2019-to-31-12-2019.csv`
+
+| Column | Data Type |
+| --- | --- |
+| Index Name  | object |
+| Date  | object |
+| P/E  | object |
+| P/B  | object |
+| Div Yield%  | object |
+
+---
