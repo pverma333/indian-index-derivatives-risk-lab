@@ -351,7 +351,16 @@
 | is_opt_monthly_expiry  |           bool | `expiry_dt == Opt_Monthly_Expiry` for that `[date,symbol]`                            |
 | moneyness              |        float64 | OPTIDX only: Calls=`spot_close-strike_pr`, Puts=`strike_pr-spot_close` (ITM positive) |
 
-
+#### Phase 1 - Audit
+| Table                   | Column                |       Type | Meaning                                                                                |
+| ----------------------- | --------------------- | ---------: | -------------------------------------------------------------------------------------- |
+| monthly_expiry_per_year | monthly_expiry_events |        int | Count of rows with `is_opt_monthly_expiry==True` for that `(symbol, year)`             |
+| near_futures_basis      | basis                 |      float | `settle_pr - spot_close` for near futures (`expiry_rank==1`)                           |
+| near_futures_basis      | basis_abs_frac        |      float | `abs(basis) / spot_close`                                                              |
+| near_futures_basis      | is_basis_spike        |       bool | True if `basis_abs_frac > 0.02`                                                        |
+| lot_size_by_year        | unique_lot_sizes      | array<int> | Sorted unique lot sizes observed in that `(symbol, year)`                              |
+| strike_density_samples  | inferred_step         |      float | Most common positive difference between sorted unique strikes (per date/symbol/expiry) |
+| strike_density_samples  | missing_in_atm_window |        int | Missing strikes count in `[ATM ± 10 * step]` window                                    |
 
 
 Important date / field consideration

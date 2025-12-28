@@ -1,6 +1,7 @@
 ── indian-index-derivatives-risk-lab
 │   │       ├── data
 │   │       │   ├── curated
+│   │       │   │   ├── derivatives_clean.parquet
 │   │       │   ├── processed
 │   │       │   │   ├── Index_Spot_Prices.csv
 │   │       │   │   ├── India_VIX_Historical.csv
@@ -30,26 +31,29 @@
 │   │       │       ├── NIFTY BANK-yield-01-07-2019-to-31-12-2019.csv
 │   │       │       └── trade_calendar.csv
 │   │       ├── notebooks
-│   │       ├── notes
-│   │       │   └── notes
-│   │       │       ├── DEVLOG.md
-│   │       │       └── requirements.txt
+│   │       │       ├── phase_1_data_validation.ipynb
+│   │       ├── docs
+│   │       │   └──
+│   │       │       ├── devlog.md
+│   │       │       └── repo_structure.md
+│   │       │       └── data_dict.md
 │   │       ├── README.md
 │   │       ├── schemas
 │   │       │   ├── curated
+│   │       │   │   ├── schema.derivatives_clean.json
 │   │       │   ├── processed
 │   │       │   └── raw
 │   │       ├── src
 │   │       │   ├── data
 │   │       │   │   ├── __pycache__
-│   │       │   │   │   ├── build_market_env_treasury.cpython-312.pyc
-│   │       │   │   │   └── map_trade_calendar.cpython-312.pyc
+│   │       │   │   ├── build_market_env_treasury.cpython-312.pyc
 │   │       │   │   ├── build_market_env_treasury.py
 │   │       │   │   ├── config_contract_lot.py
 │   │       │   │   ├── fetch_eod_niftyspot_vixclose.py
 │   │       │   │   ├── fetch_eod_v1.py
 │   │       │   │   ├── fetch_eod_v2.py
 │   │       │   │   └── map_trade_calendar.py
+│   │       │   │   └── phase_1_data_validation_utils.py
 │   │       │   ├── greeks
 │   │       │   ├── portfolio
 │   │       │   ├── risk
@@ -59,6 +63,7 @@
 │   │           │   └── test_build_market_env_treasury.cpython-312-pytest-7.4.4.pyc
 │   │           ├── test_build_market_env_treasury.py
 │   │           ├── test_map_trade_calendar.py
+│   │           ├── test_phase_1_data_validation_utils.py
 │   │           └── test_outputs
 │   │               ├── mock_derivatives.csv
 │   │               ├── trade_calendar.csv
