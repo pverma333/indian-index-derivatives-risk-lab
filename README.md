@@ -36,3 +36,23 @@ Build the curated derivatives dataset (joined spot/VIX, lot sizes, treasury rate
 ```bash
 python -m src.data.build_derivatives_curated
 
+## Data Validation (Phase 1 Audit)
+
+Run the audit notebook:
+
+1. Ensure the curated dataset exists:
+   - `data/processed/derivatives_clean.parquet`
+
+2. Open and run:
+   - `notebooks/01_data_validation.ipynb`
+
+The notebook fails fast with AssertionError if:
+- duplicates exist by unique contract key (holiday drift)
+- `cal_days_to_expiry` is negative anywhere
+- treasury rates are not in decimal form (e.g., 7.0 instead of 0.07)
+- VIX join is constant/zero per symbol
+- FUTIDX has non-zero strike_pr
+- moneyness polarity is inconsistent with CE/PE definitions
+- `expiry_rank==1` is not the nearest expiry
+- monthly expiry events are not exactly 12 per year per symbol
+- lot sizes violate the project truth table (including NIFTY 2025)

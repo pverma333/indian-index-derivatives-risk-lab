@@ -53,4 +53,16 @@
 - Tests:
   - Added `tests/test_build_derivatives_curated.py` end-to-end fixture covering joins, strike=0 for futures, rates-as-decimals, expiry_rank, moneyness, and TTE invariants
 
+## 2025-12-28
+- Added Phase 1 derivatives_clean audit notebook: `notebooks/01_data_validation.ipynb`
+- Implemented reusable audit functions in `src/data_validation/derivatives_audit.py`
+- Added pytest coverage for key invariants (uniqueness, expiry_rank, moneyness, basis)
+- Validates enrichment joins (VIX variance, rates scaling) and lot size truth table
+- Adds strike density sampling around ATM for 5 deterministic dates (seed=42)
+
+Tested:
+- `pytest -q`
+- Notebook runs end-to-end on local parquet
+Next:
+- Align lot size truth table with finalized project mapping if it differs from defaults.
 

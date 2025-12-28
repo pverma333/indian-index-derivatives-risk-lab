@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, Iterable, Optional, Tuple
 
 import pandas as pd
+import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 
@@ -220,7 +221,7 @@ def load_dividend_yields(raw_dir: Path) -> pd.DataFrame:
         yld_col = _find_first_column(
             df,
             [
-                "Div Yield%", "Div Yield %",  # observed variants
+                "Div Yield%", "Div Yield %",
                 "Div Yield",
                 "Dividend Yield", "DividendYield",
                 "Yield", "YIELD",
@@ -256,15 +257,36 @@ def load_dividend_yields(raw_dir: Path) -> pd.DataFrame:
 
 
 def load_bond_yield_file(raw_dir: Path, filename: str, tenor: str) -> pd.DataFrame:
+    """
+    Logic to handle mixed Price/Yield reporting in raw Treasury files:
+    1. If value is 0-15: consider it Yield % and convert to decimal (val/100).
+    2. If value is 60-105: consider it Price and convert to Yield ((100-price)/100).
+    """
     path = raw_dir / filename
     LOGGER.info("Loading bond yield: %s (tenor=%s)", path, tenor)
     df = _strip_columns(pd.read_csv(path))
 
     _require_columns(df, ["Date", "Price"], f"Bond yield ({filename})")
 
-    out = df[["Date", "Price"]].rename(columns={"Date": "date", "Price": "rate"})
+    out = df[["Date", "Price"]].rename(columns={"Date": "date", "Price": "raw_val"})
     out["date"] = _parse_date_series_strict(out["date"], fmt="%d-%m-%Y", ctx=f"Bond yield ({filename})")
-    out["rate"] = percent_to_decimal(out["rate"], ctx=f"Bond yield ({filename})")
+
+    # Clean raw string value
+    s = out["raw_val"].astype("string").str.replace("%", "", regex=False).str.replace(",", "", regex=False).str.strip()
+    vals = pd.to_numeric(s, errors="coerce")
+
+    def process_rate(v):
+        if pd.isna(v):
+            return np.nan
+        # 1. 0-15 -> Yield % -> decimal
+        if 0 <= v <= 15:
+            return v / 100.0
+        # 2. 60-105 -> Price -> (100-price)/100
+        if 60 <= v <= 105:
+            return (100.0 - v) / 100.0
+        return np.nan
+
+    out["rate"] = vals.apply(process_rate)
     out["tenor"] = tenor
 
     return out[["date", "tenor", "rate"]]
@@ -272,50 +294,46 @@ def load_bond_yield_file(raw_dir: Path, filename: str, tenor: str) -> pd.DataFra
 
 def build_treasury_curve(raw_dir: Path, spot_min_date: str, spot_max_date: str, cfg: BuildConfig) -> pd.DataFrame:
     """
-    Treasury curve should start from the first available treasury observation date (e.g., 2019-07-01),
-    then forward-fill across calendar days through the end of the spot range.
-    We do NOT backfill earlier than the first treasury date.
+    Treasury curve construction:
+    - Starts strictly from July 1, 2019.
+    - Forward-fills across calendar days through the end of the spot range.
     """
     parts = [load_bond_yield_file(raw_dir, fn, tenor) for fn, tenor in cfg.bond_files]
     tdf = pd.concat(parts, ignore_index=True)
 
+    # Constraint: Start filling from July 1 2019
+    target_start = "2019-07-01"
+
     treasury_min = tdf["date"].min()
-    treasury_max = tdf["date"].max()
+    if target_start < treasury_min:
+        LOGGER.warning("Requested start %s is earlier than first treasury data point %s. Starting from %s.",
+                       target_start, treasury_min, treasury_min)
+        actual_start = treasury_min
+    else:
+        actual_start = target_start
 
-    if spot_max_date < treasury_min:
-        raise ValueError(
-            f"Treasury curve: spot ends at {spot_max_date} but treasury starts at {treasury_min}. "
-            "No overlapping range to build required treasury curve."
-        )
+    end_date = max(spot_max_date, tdf["date"].max())
 
-    start_date = max(spot_min_date, treasury_min)
-    end_date = max(spot_max_date, treasury_max)
+    if actual_start > end_date:
+        raise ValueError(f"Treasury curve: invalid date range start={actual_start} end={end_date}")
 
-    if start_date > end_date:
-        raise ValueError(f"Treasury curve: invalid date range start={start_date} end={end_date}")
-
-    if spot_min_date < treasury_min:
-        LOGGER.warning(
-            "Treasury curve: spot starts at %s but treasury starts at %s. "
-            "Treasury output will start at %s (no backfill).",
-            spot_min_date,
-            treasury_min,
-            start_date,
-        )
-
-    all_dates = pd.date_range(start=start_date, end=end_date, freq="D").strftime("%Y-%m-%d")
+    all_dates = pd.date_range(start=actual_start, end=end_date, freq="D").strftime("%Y-%m-%d")
     wide = tdf.pivot(index="date", columns="tenor", values="rate").reindex(all_dates).sort_index()
 
     nulls_before = int(wide.isna().sum().sum())
-    wide = wide.ffill()  # forward-fill only
+    wide = wide.ffill()  # forward-fill across weekends/holidays
     nulls_after = int(wide.isna().sum().sum())
 
     LOGGER.info("Treasury curve: forward-fill across calendar. nulls before=%d after=%d", nulls_before, nulls_after)
 
-    # Since start_date >= treasury_min, the first row should have actual values.
+    # Start row check
+    if wide.iloc[0].isna().any():
+        LOGGER.warning("Treasury curve: Start row still has nulls. First data point might be after %s. Attempting minor bfill.", actual_start)
+        wide = wide.bfill(limit=30)
+
     if wide.isna().any().any():
         sample = wide[wide.isna().any(axis=1)].head(10)
-        raise ValueError(f"Treasury curve: still has nulls after ffill. Sample rows:\n{sample}")
+        raise ValueError(f"Treasury curve: still has nulls after ffill/bfill. Sample rows:\n{sample}")
 
     out = wide.reset_index().rename(columns={"index": "date"}).melt(
         id_vars=["date"],
