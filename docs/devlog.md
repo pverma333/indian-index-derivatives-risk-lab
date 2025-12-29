@@ -136,3 +136,36 @@ print(out.head())
 print(out.tail())
 print(out.columns.tolist())
 "
+
+
+---
+
+
+## 2025-12-29 — feat: Monthly Bull Call Spread with unique leg-ID accounting (#26)
+
+### What changed
+- Added `BullCallSpreadStrategy` in `src/strategies/bull_call_spread.py`.
+- Implemented monthly debit spread construction:
+  - Long ATM CE (closest strike to `spot_close`)
+  - Short OTM CE at `ATM + 200`
+  - Enforced same `expiry_dt` (next monthly expiry after entry date)
+- Implemented **unique leg-level trade IDs** to prevent MTM `settle_prev` interleaving across legs:
+  - `parent_trade_id = SYMBOL_BCS_YYYYMMDD`
+  - `trade_id = parent_trade_id + "_LONG_CE"` and `"_SHORT_CE"`
+- Added liquidity guard at entry (`open_int > 0` and `volume > 0` for both legs).
+- Aggregated leg-level daily MTM P&L back to `parent_trade_id` so strategy output is one row per day per spread.
+
+### Why
+- The MTM engine computes `settle_prev` by shifting within groups keyed by `trade_id`.
+- If both legs share the same `trade_id`, shifting can mix prices from different contracts/strikes, producing incorrect P&L.
+- Unique per-leg `trade_id` ensures the engine shifts prices within the same contract only.
+
+### Tests
+- Added `tests/test_bull_call_spread.py`:
+  - Verifies unique leg IDs and correct `position_sign` (+1 long, -1 short)
+  - Verifies strategy-level aggregation equals sum of legs (using deterministic toy data)
+
+### How to run
+```bash
+pytest -q
+python -m pytest -q tests/test_bull_call_spread.py

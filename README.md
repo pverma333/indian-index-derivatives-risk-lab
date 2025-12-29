@@ -173,3 +173,21 @@ Implements a monthly ATM short straddle on NIFTY:
 
 Output schema:
 [date, symbol, strike_pr, strategy_pnl_rupee, cum_pnl_rupee, trade_id]
+
+
+## Strategies
+
+### Bull Call Spread (Monthly) — `BullCallSpreadStrategy`
+
+Implements a **debit call spread** on the next monthly expiry:
+
+- **Long leg (BUY):** ATM Call (strike closest to `spot_close`)
+- **Short leg (SELL):** OTM Call at `ATM + 200`
+- **Liquidity guard:** abort entry if either leg has `open_int == 0` or `volume == 0`
+- **Critical accounting fix:** each leg gets a **unique** `trade_id` to prevent MTM “settle_prev” interleaving across legs.
+  - `parent_trade_id = SYMBOL_BCS_YYYYMMDD`
+  - long `trade_id = parent_trade_id + "_LONG_CE"`
+  - short `trade_id = parent_trade_id + "_SHORT_CE"`
+- After leg-level MTM is computed, P&L is **aggregated back** to `parent_trade_id`.
+
+#### RUN
