@@ -107,3 +107,32 @@ Next:
 - Add integration-style test against a small real-data sample slice from `derivatives_clean.parquet`.
 - Extend blotter schema support for multi-leg strategies (spreads) while keeping vectorization.
 
+## 2025-12-29
+- Added ShortStraddleStrategy (monthly ATM short straddle) with:
+  - ATM strike resolver + strike-interval rounding
+  - Strict CE/PE existence + liquidity validation on entry
+  - Leg synchronization guard (drops whole trade if calendars diverge)
+  - Expiry intrinsic settlement validation vs spot settlement
+  - Strategy-level aggregation output schema
+
+Tested:
+- pytest: liquidity abort, large move loss, intrinsic validation failure
+
+How to run short straddly
+python -c "
+import logging
+from src.strategies.short_straddle import ShortStraddleStrategy, ShortStraddleStrategyConfig
+
+logging.basicConfig(level=logging.INFO)
+
+cfg = ShortStraddleStrategyConfig(
+    input_parquet_path='data>curated>nifty_options.parquet',
+    symbol='NIFTY',
+    strike_interval=50,
+)
+s = ShortStraddleStrategy(cfg)
+out = s.run()
+print(out.head())
+print(out.tail())
+print(out.columns.tolist())
+"

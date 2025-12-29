@@ -159,3 +159,17 @@ pnl_df = engine.compute_mtm_pnl_rupee(mkt, trades)
 
 # Save if desired
 pnl_df.to_parquet("data/outputs/mtm_pnl.parquet", index=False)
+
+
+## ShortStraddleStrategy (Monthly ATM, Liquidity-Aware)
+
+Implements a monthly ATM short straddle on NIFTY:
+- Entry: first trading day after monthly expiry (engine calendar)
+- Expiry: next monthly expiry date
+- Strike: ATM (min abs(spot_close - strike)), constrained to strike_interval multiples
+- Liquidity guard: both CE and PE must have open_int > 0 and volume > 0 on entry
+- No partial fills: missing/illiquid leg aborts the whole straddle for that month
+- P&L: computed per leg via BaseStrategy.compute_mtm_pnl_rupee, aggregated to strategy series
+
+Output schema:
+[date, symbol, strike_pr, strategy_pnl_rupee, cum_pnl_rupee, trade_id]
