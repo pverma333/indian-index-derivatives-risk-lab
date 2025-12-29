@@ -66,3 +66,44 @@ Tested:
 Next:
 - Align lot size truth table with finalized project mapping if it differs from defaults.
 
+
+
+---
+## 2025-12-29 — Vectorized Rupee MTM P&L Engine + Contract Lifecycle Guards
+
+### Added
+- `src/strategies/engine_pnl.py`
+  - Implemented `BaseStrategy` as the foundational parent class for strategies.
+  - Implemented `load_market_data()` with required-column validation and `expiry_rank == 1` filtering.
+  - Implemented `identify_entry_days()`:
+    - Entry day = first trading day strictly after an `is_opt_monthly_expiry == True` day (per `symbol`).
+  - Implemented vectorized MTM Rupee P&L engine `compute_mtm_pnl_rupee()`:
+    - Entry-day P&L uses `(settle_t - entry_price) * lot_size`
+    - Holding-day P&L uses `(settle_t - settle_{t-1}) * lot_size`
+    - `position_sign` supports long (+1) / short (-1)
+
+- Safety guards and bookkeeping:
+  - Settlement fallback: if `settle_pr` is `NaN` or `0`, fallback to `close` with warnings and sample rows.
+  - Lot size integrity: raises `DataIntegrityError` if `lot_size` changes within a `trade_id`.
+  - Expiry exit: enforces that each trade has a market row on `expiry_dt` to force-close using final exchange settlement.
+  - Output includes `daily_pnl_rupee` and `cum_pnl_rupee` per trade lifecycle.
+
+- `tests/test_engine_pnl.py`
+  - Deterministic unit test confirming:
+    - Long MTM path matches expected daily/cumulative P&L
+    - Short position generates positive P&L when settlement decreases
+    - Lot size change mid-trade raises `DataIntegrityError`
+
+### Why
+- Establish a reusable, strategy-agnostic engine for MTM P&L with robust lifecycle handling.
+- Ensure correctness and data safety (settlement gaps, bad joins, and expiry closure).
+
+### Tested
+- `pytest -q`
+- Unit tests cover MTM formulas, sign behavior, and integrity checks.
+
+### Next
+- Add a small utility method to persist outputs with consistent naming (optional).
+- Add integration-style test against a small real-data sample slice from `derivatives_clean.parquet`.
+- Extend blotter schema support for multi-leg strategies (spreads) while keeping vectorization.
+

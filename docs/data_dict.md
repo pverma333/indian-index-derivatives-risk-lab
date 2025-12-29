@@ -363,6 +363,22 @@
 | strike_density_samples  | missing_in_atm_window |        int | Missing strikes count in `[ATM ± 10 * step]` window                                    |
 
 
+## startegy_mtm_pnl.parquet — Data Dictionary
+**Path:** `data/curated/startegy_mtm_pnl.parquet`
+| Column          |   Type | Nullable | Description                                                        |
+| --------------- | -----: | :------: | ------------------------------------------------------------------ |
+| trade_id        | string |    No    | Unique identifier per trade lifecycle                              |
+| date            |   date |    No    | Trading date for MTM                                               |
+| symbol          | string |    No    | Underlying (e.g., NIFTY/BANKNIFTY)                                 |
+| strike_pr       |  float |    No    | Option strike (0 for futures if used)                              |
+| option_typ      | string |    Yes   | CE/PE or null for futures                                          |
+| entry_price     |  float |    No    | Entry price used for Day-0 MTM (override or entry-day settle_used) |
+| settle_pr       |  float |    No    | Settlement used for MTM (settle_pr else close fallback)            |
+| daily_pnl_rupee |  float |    No    | MTM P&L for the day, already multiplied by lot_size                |
+| cum_pnl_rupee   |  float |    No    | Running sum of daily_pnl_rupee within trade_id                     |
+
+
+
 Important date / field consideration
 
 - nifty_historical_derivatives -
