@@ -1,0 +1,57 @@
+{
+    "name": "strategy_mtm_pnl_rupee",
+    "grain": [
+        "trade_id",
+        "date",
+        "symbol",
+        "strike_pr",
+        "option_typ"
+    ],
+    "columns": [
+        {
+            "name": "trade_id",
+            "type": "string",
+            "nullable": false
+        },
+        {
+            "name": "date",
+            "type": "date",
+            "nullable": false
+        },
+        {
+            "name": "symbol",
+            "type": "string",
+            "nullable": false
+        },
+        {
+            "name": "strike_pr",
+            "type": "float",
+            "nullable": false
+        },
+        {
+            "name": "option_typ",
+            "type": "string",
+            "nullable": true
+        },
+        {
+            "name": "entry_price",
+            "type": "float",
+            "nullable": false
+        },
+        {
+            "name": "settle_pr",
+            "type": "float",
+            "nullable": false
+        },
+        {
+            "name": "daily_pnl_rupee",
+            "type": "float",
+            "nullable": false
+        },
+        {
+            "name": "cum_pnl_rupee",
+            "type": "float",
+            "nullable": false
+        }
+    ]
+}
