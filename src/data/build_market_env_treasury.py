@@ -155,11 +155,13 @@ def load_spot_prices(processed_dir: Path, spot_csv: str) -> pd.DataFrame:
     date_col = _find_first_column(df, ["date", "Date", "DATE"])
     idx_col = _find_first_column(df, ["index_name", "Index", "INDEX", "Symbol", "SYMBOL", "Name", "Index Name"])
     close_col = _find_first_column(df, ["spot_close", "close", "Close", "CLOSE", "SpotClose", "Spot Close"])
-    if not (date_col and idx_col and close_col):
-        raise ValueError(f"Spot prices: could not infer date/index/close columns. columns={list(df.columns)}")
+    open_col = _find_first_column(df, ["open", "Open", "OPEN"])
 
-    out = df[[date_col, idx_col, close_col]].rename(
-        columns={date_col: "date", idx_col: "index_name", close_col: "spot_close"}
+    if not (date_col and idx_col and close_col and open_col):
+        raise ValueError(f"Spot prices: could not infer date/index/close/open columns. columns={list(df.columns)}")
+
+    out = df[[date_col, idx_col, close_col, open_col]].rename(
+        columns={date_col: "date", idx_col: "index_name", close_col: "spot_close", open_col: "index_open_price"}
     )
 
     parsed = pd.to_datetime(out["date"], errors="coerce")
@@ -170,6 +172,7 @@ def load_spot_prices(processed_dir: Path, spot_csv: str) -> pd.DataFrame:
 
     out["index_name"] = out["index_name"].map(normalize_index_name)
     out["spot_close"] = pd.to_numeric(out["spot_close"], errors="coerce").astype("float64")
+    out["index_open_price"] = pd.to_numeric(out["index_open_price"], errors="coerce").astype("float64")
 
     if out["spot_close"].isna().any():
         raise ValueError("Spot prices: spot_close contains nulls; spot is base and must be complete.")
@@ -178,7 +181,7 @@ def load_spot_prices(processed_dir: Path, spot_csv: str) -> pd.DataFrame:
     if out.empty:
         raise ValueError("Spot prices: no rows for NIFTY/BANKNIFTY after normalization/filtering.")
 
-    return out[["date", "index_name", "spot_close"]]
+    return out[["date", "index_name", "spot_close", "index_open_price"]]
 
 
 def load_vix(processed_dir: Path, vix_csv: str) -> pd.DataFrame:
@@ -367,7 +370,7 @@ def build_market_data(spot: pd.DataFrame, vix: pd.DataFrame, div: pd.DataFrame, 
         sample = merged.loc[merged["vix_close"].isna(), ["date", "index_name"]].head(10)
         raise ValueError(f"Market data: vix_close still has nulls={n} after ffill. Sample:\n{sample}")
 
-    return merged[["date", "index_name", "spot_close", "vix_close", "div_yield"]]
+    return merged[["date", "index_name", "spot_close", "index_open_price", "vix_close", "div_yield"]]
 
 
 def run(cfg: BuildConfig) -> None:
@@ -393,6 +396,7 @@ def run(cfg: BuildConfig) -> None:
             "date": "string",
             "index_name": "string",
             "spot_close": "float64",
+            "index_open_price": "float64",
             "vix_close": "float64",
             "div_yield": "float64",
         },
