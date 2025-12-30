@@ -166,7 +166,8 @@ def read_and_filter_derivatives(cfg: ETLConfig) -> pd.DataFrame:
 
 def load_market_data(path: Path) -> pd.DataFrame:
     df = pd.read_parquet(path)
-    for c in ("date", "spot_close", "vix_close"):
+    # Added index_open_price to required check
+    for c in ("date", "spot_close", "index_open_price", "vix_close"):
         if c not in df.columns:
             raise ValueError(f"market_data.parquet missing '{c}'")
 
@@ -180,13 +181,14 @@ def load_market_data(path: Path) -> pd.DataFrame:
 
     df["symbol"] = df["symbol"].map(normalize_symbol).astype("string")
     df["spot_close"] = df["spot_close"].astype("float64")
+    df["index_open_price"] = df["index_open_price"].astype("float64")
     df["vix_close"] = df["vix_close"].astype("float64")
     if "div_yield" in df.columns:
         df["div_yield"] = df["div_yield"].astype("float64")
     else:
         df["div_yield"] = np.nan
 
-    return df[["date", "symbol", "spot_close", "vix_close", "div_yield"]].drop_duplicates()
+    return df[["date", "symbol", "spot_close", "index_open_price", "vix_close", "div_yield"]].drop_duplicates()
 
 
 def validate_no_overlap_lot_map(lot: pd.DataFrame) -> None:
@@ -417,7 +419,8 @@ def validate_output(df: pd.DataFrame) -> None:
     if bad_fut:
         raise AssertionError(f"Found {bad_fut} FUTIDX rows where strike_pr != 0.0")
 
-    required_nonnull = ["spot_close", "vix_close", "lot_size", "rate_91d", "rate_182d", "rate_364d"]
+    # Added index_open_price to required non-null check
+    required_nonnull = ["spot_close", "index_open_price", "vix_close", "lot_size", "rate_91d", "rate_182d", "rate_364d"]
     nulls = df[required_nonnull].isna().sum()
     if nulls.any():
         raise AssertionError(f"Nulls detected in required joined columns: {nulls[nulls > 0].to_dict()}")
@@ -443,9 +446,10 @@ def build_curated_derivatives(cfg: ETLConfig) -> pd.DataFrame:
 
     LOGGER.info("Joining market_data (spot/vix) ...")
     out = deriv.merge(market, on=["date", "symbol"], how="left", validate="m:1")
-    if out["spot_close"].isna().any() or out["vix_close"].isna().any():
-        missing = out[["spot_close", "vix_close"]].isna().sum().to_dict()
-        raise ValueError(f"Missing spot/vix after join: {missing}")
+    # Updated check to include index_open_price
+    if out["spot_close"].isna().any() or out["index_open_price"].isna().any() or out["vix_close"].isna().any():
+        missing = out[["spot_close", "index_open_price", "vix_close"]].isna().sum().to_dict()
+        raise ValueError(f"Missing spot/open/vix after join: {missing}")
 
     LOGGER.info("Attaching lot_size (effective-dated) ...")
     out = attach_lot_size(out, lot)
@@ -513,6 +517,7 @@ def build_curated_derivatives(cfg: ETLConfig) -> pd.DataFrame:
         "open_int",
         "chg_in_oi",
         "spot_close",
+        "index_open_price", # Included in preferred columns
         "vix_close",
         "div_yield",
         "lot_size",

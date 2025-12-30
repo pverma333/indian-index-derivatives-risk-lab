@@ -55,6 +55,8 @@ class BaseStrategy(ABC):
         "expiry_dt",
         "strike_pr",
         "option_typ",
+        "open",                # Contract Open for Overnight P&L
+        "index_open_price",    # Index Open for Gap Risk Trigger
         "close",
         "settle_pr",
         "lot_size",
@@ -260,12 +262,15 @@ class BaseStrategy(ABC):
         merged["daily_pnl_rupee"] = merged["daily_pnl_rupee"].fillna(0.0)
         merged["cum_pnl_rupee"] = merged.groupby(schema.trade_id)["daily_pnl_rupee"].cumsum()
 
+        # PASS-THROUGH FOR ANALYTICS: Add open and index_open_price to the output
         out = merged[
             [
                 "date",
                 "symbol",
                 "strike_pr",
                 "option_typ",
+                "open",                # Contract Open snap for Overnight P&L
+                "index_open_price",    # Index Open snap for Gap analysis
                 "settle_used",
                 "entry_price_resolved",
                 "daily_pnl_rupee",

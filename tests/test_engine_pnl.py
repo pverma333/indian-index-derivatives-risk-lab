@@ -22,6 +22,8 @@ def _make_market_df(
     dates,
     settle,
     close,
+    open_px=None,
+    index_open=None,
     lot_size=50,
     symbol="NIFTY",
     expiry_dt="2023-02-23",
@@ -33,6 +35,12 @@ def _make_market_df(
     is_opt_monthly_expiry=False,
 ):
     n = len(dates)
+    # If not provided, default open to close for simple MTM tests
+    if open_px is None:
+        open_px = close
+    if index_open is None:
+        index_open = [20000.0] * n
+
     return pd.DataFrame(
         {
             "date": pd.to_datetime(dates).normalize(),
@@ -41,6 +49,8 @@ def _make_market_df(
             "expiry_dt": pd.to_datetime([expiry_dt] * n).normalize(),
             "strike_pr": [strike_pr] * n,
             "option_typ": [option_typ] * n,
+            "open": open_px,                # Added for stress-test pass-through
+            "index_open_price": index_open, # Added for stress-test pass-through
             "close": close,
             "settle_pr": settle,
             "lot_size": [lot_size] * n,
@@ -86,6 +96,10 @@ def test_long_call_one_month_vectorized_pnl_runs_and_matches_expected():
     assert out["daily_pnl_rupee"].to_numpy().tolist() == expected_daily.tolist()
     assert out["cum_pnl_rupee"].to_numpy().tolist() == expected_cum.tolist()
     assert out["date"].max() == pd.to_datetime("2023-02-23")
+
+    # Verify pass-through columns exist in output
+    assert "open" in out.columns
+    assert "index_open_price" in out.columns
 
 
 def test_short_position_positive_when_settle_decreases():
