@@ -122,6 +122,12 @@
       "description": "Underlying spot close joined from market_data.parquet"
     },
     {
+      "name": "index_open_price",
+      "type": "float",
+      "nullable": false,
+      "description": "Underlying spot open price joined from market_data.parquet"
+    },
+    {
       "name": "vix_close",
       "type": "float",
       "nullable": false,
@@ -234,6 +240,7 @@
       "settle_pr",
       "spot_close",
       "vix_close",
+      "index_open_price",
       "lot_size",
       "rate_91d",
       "rate_182d",
