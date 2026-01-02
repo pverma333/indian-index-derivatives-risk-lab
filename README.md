@@ -143,3 +143,19 @@ apply_liquidity_filters() (OFF/ABSOLUTE/PERCENTILE)
 select_atm_strike() (requires both CE+PE; fallback steps)
 
 select_otm_strike_above/below() (exact-or-nearest fallback)
+
+dd a short section:
+
+validate_trades_df(trades_df) enforces:
+
+required columns (keys/contract/position/lifecycle/selection params)
+
+leg_id unique across the entire dataframe (prevents join mixing)
+
+side ∈ {+1,-1}, qty_lots integer and >=1
+
+entry_date <= exit_date
+
+tenor ∈ {WEEKLY,MONTHLY}, liquidity_mode ∈ {OFF,ABSOLUTE,PERCENTILE}
+
+nullable: width_points, otm_distance_points, exit_k_days (unless K-days rule)
