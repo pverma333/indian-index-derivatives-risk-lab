@@ -94,3 +94,15 @@ Why: ensures correct expiry-day valuation and consistent entry anchoring for dow
 Tested: pytest -q (unit tests for non-expiry, CE/PE intrinsic, FUTIDX unchanged, and missing-input integrity errors).
 
 Next: wire into runner ordering: validate market → compute settle_used → enrich entry_price → engine MTM.
+
+
+Implemented build_expiry_cycles() in src/strategies/expiry_selectors.py
+Uses only dataset flags (no weekday assumptions)
+Deterministic next-trading-day entry selection via is_trading_day
+Added drop auditing via warning logs (MISSING_ENTRY_DATE) and optional returned dropped_df
+Added pytest coverage for monthly, weekly, and missing-entry drop cases
+
+
+Added src/strategies/expiry_selectors.py:build_expiry_cycles() implementing Phase 2 expiry-cycle construction using dataset flags only.
+Added pytest coverage for monthly, weekly, and missing entry-date drop behavior (including log assertions).
+Tested with pytest -q tests/test_expiry_selectors.py.
