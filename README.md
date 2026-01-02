@@ -85,3 +85,20 @@ validate_market_df() enforces Phase 2 market contract (required columns, option 
 python -c "import pandas as pd; from validation.market_df_validator import validate_market_df; df=pd.read_csv('data/curated/derivatives_clean_Q1_2025.csv'); validate_market_df(df)"
 
 Use it immediately after loading derivatives_clean.parquet before any strategy backtest.
+
+README snippet (update)
+
+Replace references to src/engine/marking.py with:
+
+README snippet (add under “Engine / Marking”)
+
+compute_settle_used(market_df) enriches the market dataset with:
+
+settle_used: deterministic EOD marking used for MTM and entry anchoring
+
+price_method: "SETTLE_PR" by default; "INTRINSIC_ON_EXPIRY" for OPTIDX on expiry day (cal_days_to_expiry == 0)
+
+This is required so enrichment can set entry_price = settle_used(entry_date) for the Day-0 settle_prev_used anchor in the engine.
+
+Run for smoke test on integrated data - pytest -q -s tests/test_settle_used_q1_2025.py
+

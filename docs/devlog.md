@@ -67,7 +67,7 @@ Next:
 - Align lot size truth table with finalized project mapping if it differs from defaults.
 
 
-
+## 2025-02-01
 ---
 DEVLOG entry
 
@@ -86,3 +86,11 @@ Added src/validation/market_df_validator.py Phase 2 gatekeeper.
 Added DataIntegrityError with standardized violation preview.
 
 Added unit tests for missing columns, option typ domain, FUTIDX invariants, and index_open_price completeness.
+
+Added: deterministic marking logic for settle_used + price_method with OPTIDX expiry intrinsic override.
+
+Why: ensures correct expiry-day valuation and consistent entry anchoring for downstream settle_prev_used logic.
+
+Tested: pytest -q (unit tests for non-expiry, CE/PE intrinsic, FUTIDX unchanged, and missing-input integrity errors).
+
+Next: wire into runner ordering: validate market → compute settle_used → enrich entry_price → engine MTM.
