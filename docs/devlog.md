@@ -115,3 +115,9 @@ Added contract_selectors.py implementing chain extraction, strike banding, liqui
 Added unit tests covering required behaviors including fallback logic and percentile thresholds.
 
 Tested: pytest -q tests/test_contract_selectors.py
+
+Added src/strategies/trade_schema.py with TradeSchemaError + validate_trades_df.
+
+Added tests covering missing columns, duplicate leg_id fail-fast, invalid side, and bad tenor.
+
+Tested via pytest -q.
