@@ -49,6 +49,7 @@ def test_curated_derivatives_core_invariants(tmp_path: Path) -> None:
             "date": ["2025-01-02", "2025-01-04"],
             "index_name": ["NIFTY", "NIFTY"],
             "spot_close": [20100.0, 20300.0],
+            "index_open_price": [20050.0, 20250.0],
             "vix_close": [13.5, 14.2],
             "div_yield": [0.012, 0.012],
         }
