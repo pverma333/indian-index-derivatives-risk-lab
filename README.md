@@ -79,3 +79,9 @@ run_cfg = get_phase2_default_run_config() then merge CLI overrides.
 For each (strategy, tenor) call resolve_effective_strategy_params(strategy, tenor, user_overrides) and pass the resulting dict into the strategy.
 
 Write raw overrides + effective configs into run_manifest.json.
+
+validate_market_df() enforces Phase 2 market contract (required columns, option type domain, FUTIDX/OPTIDX invariants, index_open_price non-null in window, boolean expiry flags).
+
+python -c "import pandas as pd; from validation.market_df_validator import validate_market_df; df=pd.read_csv('data/curated/derivatives_clean_Q1_2025.csv'); validate_market_df(df)"
+
+Use it immediately after loading derivatives_clean.parquet before any strategy backtest.

@@ -80,3 +80,9 @@ Added strict validation with ConfigError(errors=[...]) to fail early and clearly
 Added unit tests covering defaults, overrides, validations, JSON-serializability.
 
 Tested: pytest -q.
+
+Added src/validation/market_df_validator.py Phase 2 gatekeeper.
+
+Added DataIntegrityError with standardized violation preview.
+
+Added unit tests for missing columns, option typ domain, FUTIDX invariants, and index_open_price completeness.
