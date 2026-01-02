@@ -398,3 +398,27 @@ Important date / field consideration
 - treasury_data.parquet -
 -----> date - yyyy-mm-dd format
 -----> rate - percentage converted to decimal so # in decimals
+
+
+| Field                       |   Type | Nullable | Description                                                     |
+| --------------------------- | -----: | :------: | --------------------------------------------------------------- |
+| strategy_name               | string |    no    | Strategy key (`short_straddle`, etc.)                           |
+| tenor                       | string |    no    | `WEEKLY` or `MONTHLY` (single-tenor resolution)                 |
+| param_version               | string |    no    | Registry version (e.g., `phase2_v1`)                            |
+| qty_lots                    |    int |    no    | Lots per leg                                                    |
+| strike_band_n_weekly        |    int |    no    | Weekly strike band default                                      |
+| strike_band_n_monthly       |    int |    no    | Monthly strike band default                                     |
+| strike_band_n               |    int |    no    | Derived by tenor from weekly/monthly                            |
+| max_atm_search_steps        |    int |    no    | ATM selection fallback steps                                    |
+| liquidity_mode              | string |    no    | `OFF` / `ABSOLUTE` / `PERCENTILE`                               |
+| min_contracts               |    int |    no    | Used when `ABSOLUTE`                                            |
+| min_open_int                |    int |    no    | Used when `ABSOLUTE`                                            |
+| liquidity_percentile        |    int |    no    | Used when `PERCENTILE` (0–100)                                  |
+| exit_rule                   | string |    no    | Phase 2 default `EXPIRY` (stub supports `K_DAYS_BEFORE_EXPIRY`) |
+| exit_k_days                 |    int |    yes   | Required if `exit_rule=K_DAYS_BEFORE_EXPIRY`                    |
+| fees_bps                    |  float |    no    | Stored for later fee application                                |
+| fixed_fee_per_lot           |  float |    no    | Stored for later fee application                                |
+| width_points                |    int |    yes   | Spread width (spreads only)                                     |
+| otm_distance_points         |    int |    yes   | Strangle distance (strangle only)                               |
+| otm_distance_points_weekly  |    int |    yes   | Present for short_strangle (input to derived)                   |
+| otm_distance_points_monthly |    int |    yes   | Present for short_strangle (input to derived)                   |

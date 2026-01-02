@@ -58,136 +58,24 @@ The notebook fails fast with AssertionError if:
 - lot sizes violate the project truth table (including NIFTY 2025)
 
 
-# Vectorized Rupee MTM P&L Engine
+# Run unit tests
+pytest -q
 
-This repo implements a foundational **vectorized Mark-to-Market (MTM) P&L engine** for Indian derivatives data. The core class is `BaseStrategy` in `src/strategies/engine_pnl.py`, intended to be subclassed by specific strategies.
+# (Example usage in runner code)
+python -c "
+from src.config.phase2_params import resolve_effective_strategy_params
+print(resolve_effective_strategy_params('short_strangle','WEEKLY',{'qty_lots':2}))
+"
+README snippet (how to use)
 
-## What it does
+Phase 2 Parameter Registry
 
-Given:
-- Curated derivatives market data (`derivatives_clean.parquet`)
-- A strategy-produced **trade blotter** (one row per trade)
+Defaults and validations live in src/config/phase2_params.py.
 
-The engine expands each trade across its contract life (from `entry_date` to `expiry_dt`, inclusive) and computes **daily** and **cumulative** Rupee MTM P&L using exchange settlement prices.
+Runner should:
 
-### MTM logic (single leg)
+run_cfg = get_phase2_default_run_config() then merge CLI overrides.
 
-- **Entry day (Day 0):**
-  `daily_pnl_rupee = position_sign * (settle_t - entry_price) * lot_size_t`
+For each (strategy, tenor) call resolve_effective_strategy_params(strategy, tenor, user_overrides) and pass the resulting dict into the strategy.
 
-- **Holding days (Day t):**
-  `daily_pnl_rupee = position_sign * (settle_t - settle_{t-1}) * lot_size_t`
-
-Where:
-- `position_sign` = `+1` (Long), `-1` (Short)
-- `lot_size` is applied **row-level** to preserve accuracy during historical transitions
-
-## Files
-
-- `src/strategies/engine_pnl.py`
-  - `BaseStrategyConfig`
-  - `DataIntegrityError`
-  - `TradeBlotterSchema`
-  - `BaseStrategy` with:
-    - `load_market_data()`
-    - `identify_entry_days()`
-    - `compute_mtm_pnl_rupee()`
-
-- `tests/test_engine_pnl.py`
-  - pytest unit tests for MTM logic and integrity guards
-
-## Input data
-
-- Parquet path (provided via config):
-  - `data>curated>derivatives_clean.parquet` (also supports normal `data/curated/...` paths)
-
-Expected market columns (subset):
-- `date`, `symbol`, `instrument`, `expiry_dt`, `strike_pr`, `option_typ`
-- `close`, `settle_pr`, `lot_size`
-- `expiry_rank`, `is_trading_day`, `is_opt_monthly_expiry`
-
-## Trade blotter format
-
-A strategy must create a DataFrame with **one row per trade** containing at least:
-
-- `trade_id`
-- `symbol`, `instrument`, `expiry_dt`, `strike_pr`, `option_typ`
-- `entry_date`
-- `position_sign` (`+1` long / `-1` short)
-
-Optional:
-- `entry_price` (if omitted, engine uses `settle_pr` on `entry_date`)
-
-## Output
-
-`compute_mtm_pnl_rupee(...)` returns a **pandas DataFrame** (it does not write files automatically).
-
-Columns:
-- `date`, `symbol`, `strike_pr`, `option_typ`
-- `entry_price` (resolved)
-- `settle_pr` (the value actually used; may be fallback-to-close)
-- `daily_pnl_rupee`
-- `cum_pnl_rupee`
-- `trade_id`
-
-**Grain:** one row per `trade_id` per `date`.
-
-## Safety guards
-
-- **Missing settlement:** if `settle_pr` is `NaN` or `0`, fallback to `close` and log a warning (includes examples).
-- **Lot size integrity:** if `lot_size` changes within the same `trade_id`, raise `DataIntegrityError`.
-- **Expiry exit:** requires a market row on `expiry_dt` for each trade (force-close using exchange-provided final settlement).
-
-## Example usage
-
-```python
-import pandas as pd
-from src.strategies.engine_pnl import BaseStrategy, BaseStrategyConfig
-
-class MyStrategy(BaseStrategy):
-    def build_trades(self, market_df: pd.DataFrame, entry_days: pd.DataFrame) -> pd.DataFrame:
-        # build your blotter here (one row per trade)
-        raise NotImplementedError
-
-engine = MyStrategy(BaseStrategyConfig(input_parquet_path="data>curated>derivatives_clean.parquet"))
-
-mkt = engine.load_market_data()
-entry_days = engine.identify_entry_days(mkt)
-
-trades = engine.build_trades(mkt, entry_days)
-pnl_df = engine.compute_mtm_pnl_rupee(mkt, trades)
-
-# Save if desired
-pnl_df.to_parquet("data/outputs/mtm_pnl.parquet", index=False)
-
-
-## ShortStraddleStrategy (Monthly ATM, Liquidity-Aware)
-
-Implements a monthly ATM short straddle on NIFTY:
-- Entry: first trading day after monthly expiry (engine calendar)
-- Expiry: next monthly expiry date
-- Strike: ATM (min abs(spot_close - strike)), constrained to strike_interval multiples
-- Liquidity guard: both CE and PE must have open_int > 0 and volume > 0 on entry
-- No partial fills: missing/illiquid leg aborts the whole straddle for that month
-- P&L: computed per leg via BaseStrategy.compute_mtm_pnl_rupee, aggregated to strategy series
-
-Output schema:
-[date, symbol, strike_pr, strategy_pnl_rupee, cum_pnl_rupee, trade_id]
-
-
-## Strategies
-
-### Bull Call Spread (Monthly) — `BullCallSpreadStrategy`
-
-Implements a **debit call spread** on the next monthly expiry:
-
-- **Long leg (BUY):** ATM Call (strike closest to `spot_close`)
-- **Short leg (SELL):** OTM Call at `ATM + 200`
-- **Liquidity guard:** abort entry if either leg has `open_int == 0` or `volume == 0`
-- **Critical accounting fix:** each leg gets a **unique** `trade_id` to prevent MTM “settle_prev” interleaving across legs.
-  - `parent_trade_id = SYMBOL_BCS_YYYYMMDD`
-  - long `trade_id = parent_trade_id + "_LONG_CE"`
-  - short `trade_id = parent_trade_id + "_SHORT_CE"`
-- After leg-level MTM is computed, P&L is **aggregated back** to `parent_trade_id`.
-
-#### RUN
+Write raw overrides + effective configs into run_manifest.json.

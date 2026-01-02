@@ -69,103 +69,14 @@ Next:
 
 
 ---
-## 2025-12-29 — Vectorized Rupee MTM P&L Engine + Contract Lifecycle Guards
+DEVLOG entry
 
-### Added
-- `src/strategies/engine_pnl.py`
-  - Implemented `BaseStrategy` as the foundational parent class for strategies.
-  - Implemented `load_market_data()` with required-column validation and `expiry_rank == 1` filtering.
-  - Implemented `identify_entry_days()`:
-    - Entry day = first trading day strictly after an `is_opt_monthly_expiry == True` day (per `symbol`).
-  - Implemented vectorized MTM Rupee P&L engine `compute_mtm_pnl_rupee()`:
-    - Entry-day P&L uses `(settle_t - entry_price) * lot_size`
-    - Holding-day P&L uses `(settle_t - settle_{t-1}) * lot_size`
-    - `position_sign` supports long (+1) / short (-1)
+Added Phase 2 parameter registry (phase2_params.py) as the single source of truth for defaults/overrides/validations.
 
-- Safety guards and bookkeeping:
-  - Settlement fallback: if `settle_pr` is `NaN` or `0`, fallback to `close` with warnings and sample rows.
-  - Lot size integrity: raises `DataIntegrityError` if `lot_size` changes within a `trade_id`.
-  - Expiry exit: enforces that each trade has a market row on `expiry_dt` to force-close using final exchange settlement.
-  - Output includes `daily_pnl_rupee` and `cum_pnl_rupee` per trade lifecycle.
+Added deterministic effective param resolution by tenor (weekly/monthly).
 
-- `tests/test_engine_pnl.py`
-  - Deterministic unit test confirming:
-    - Long MTM path matches expected daily/cumulative P&L
-    - Short position generates positive P&L when settlement decreases
-    - Lot size change mid-trade raises `DataIntegrityError`
+Added strict validation with ConfigError(errors=[...]) to fail early and clearly.
 
-### Why
-- Establish a reusable, strategy-agnostic engine for MTM P&L with robust lifecycle handling.
-- Ensure correctness and data safety (settlement gaps, bad joins, and expiry closure).
+Added unit tests covering defaults, overrides, validations, JSON-serializability.
 
-### Tested
-- `pytest -q`
-- Unit tests cover MTM formulas, sign behavior, and integrity checks.
-
-### Next
-- Add a small utility method to persist outputs with consistent naming (optional).
-- Add integration-style test against a small real-data sample slice from `derivatives_clean.parquet`.
-- Extend blotter schema support for multi-leg strategies (spreads) while keeping vectorization.
-
-## 2025-12-29
-- Added ShortStraddleStrategy (monthly ATM short straddle) with:
-  - ATM strike resolver + strike-interval rounding
-  - Strict CE/PE existence + liquidity validation on entry
-  - Leg synchronization guard (drops whole trade if calendars diverge)
-  - Expiry intrinsic settlement validation vs spot settlement
-  - Strategy-level aggregation output schema
-
-Tested:
-- pytest: liquidity abort, large move loss, intrinsic validation failure
-
-How to run short straddly
-python -c "
-import logging
-from src.strategies.short_straddle import ShortStraddleStrategy, ShortStraddleStrategyConfig
-
-logging.basicConfig(level=logging.INFO)
-
-cfg = ShortStraddleStrategyConfig(
-    input_parquet_path='data>curated>nifty_options.parquet',
-    symbol='NIFTY',
-    strike_interval=50,
-)
-s = ShortStraddleStrategy(cfg)
-out = s.run()
-print(out.head())
-print(out.tail())
-print(out.columns.tolist())
-"
-
-
----
-
-
-## 2025-12-29 — feat: Monthly Bull Call Spread with unique leg-ID accounting (#26)
-
-### What changed
-- Added `BullCallSpreadStrategy` in `src/strategies/bull_call_spread.py`.
-- Implemented monthly debit spread construction:
-  - Long ATM CE (closest strike to `spot_close`)
-  - Short OTM CE at `ATM + 200`
-  - Enforced same `expiry_dt` (next monthly expiry after entry date)
-- Implemented **unique leg-level trade IDs** to prevent MTM `settle_prev` interleaving across legs:
-  - `parent_trade_id = SYMBOL_BCS_YYYYMMDD`
-  - `trade_id = parent_trade_id + "_LONG_CE"` and `"_SHORT_CE"`
-- Added liquidity guard at entry (`open_int > 0` and `volume > 0` for both legs).
-- Aggregated leg-level daily MTM P&L back to `parent_trade_id` so strategy output is one row per day per spread.
-
-### Why
-- The MTM engine computes `settle_prev` by shifting within groups keyed by `trade_id`.
-- If both legs share the same `trade_id`, shifting can mix prices from different contracts/strikes, producing incorrect P&L.
-- Unique per-leg `trade_id` ensures the engine shifts prices within the same contract only.
-
-### Tests
-- Added `tests/test_bull_call_spread.py`:
-  - Verifies unique leg IDs and correct `position_sign` (+1 long, -1 short)
-  - Verifies strategy-level aggregation equals sum of legs (using deterministic toy data)
-
-### How to run
-```bash
-pytest -q
-python -m pytest -q tests/test_bull_call_spread.py
+Tested: pytest -q.
