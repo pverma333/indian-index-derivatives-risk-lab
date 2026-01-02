@@ -106,3 +106,12 @@ Added pytest coverage for monthly, weekly, and missing-entry drop cases
 Added src/strategies/expiry_selectors.py:build_expiry_cycles() implementing Phase 2 expiry-cycle construction using dataset flags only.
 Added pytest coverage for monthly, weekly, and missing entry-date drop behavior (including log assertions).
 Tested with pytest -q tests/test_expiry_selectors.py.
+
+
+DEVLOG entry
+
+Added contract_selectors.py implementing chain extraction, strike banding, liquidity filtering (3 modes), and robust ATM/OTM strike selection with deterministic tie-breaks.
+
+Added unit tests covering required behaviors including fallback logic and percentile thresholds.
+
+Tested: pytest -q tests/test_contract_selectors.py

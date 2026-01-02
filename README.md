@@ -125,3 +125,21 @@ entry_date is the next trading day strictly after expiry_dt where is_trading_day
 
 cycles with missing entry_date are dropped and logged as MISSING_ENTRY_DATE
 python -m pytest -q tests/test_expiry_selectors.py
+
+
+
+README snippet (add under “Strategies → Contract selection utilities”)
+
+New module: src/strategies/contract_selectors.py
+
+Provides deterministic utilities:
+
+get_chain() (skip-safe empty df)
+
+apply_strike_band() (ATM ± N strikes by count)
+
+apply_liquidity_filters() (OFF/ABSOLUTE/PERCENTILE)
+
+select_atm_strike() (requires both CE+PE; fallback steps)
+
+select_otm_strike_above/below() (exact-or-nearest fallback)
