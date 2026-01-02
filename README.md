@@ -102,3 +102,26 @@ This is required so enrichment can set entry_price = settle_used(entry_date) for
 
 Run for smoke test on integrated data - pytest -q -s tests/test_settle_used_q1_2025.py
 
+Add a section:
+
+Expiry cycle construction (Phase 2)
+Cycles are built deterministically from dataset flags:
+
+WEEKLY cycles use is_opt_weekly_expiry == True
+
+MONTHLY cycles use is_opt_monthly_expiry == True
+
+entry_date is the next is_trading_day == True date strictly after expiry_dt
+
+Cycles with no available entry_date are dropped and logged as MISSING_ENTRY_DATE
+
+build_expiry_cycles(market_df, symbol, tenor) creates expiry cycles from dataset flags:
+
+WEEKLY uses is_opt_weekly_expiry == True
+
+MONTHLY uses is_opt_monthly_expiry == True
+
+entry_date is the next trading day strictly after expiry_dt where is_trading_day == True
+
+cycles with missing entry_date are dropped and logged as MISSING_ENTRY_DATE
+python -m pytest -q tests/test_expiry_selectors.py
