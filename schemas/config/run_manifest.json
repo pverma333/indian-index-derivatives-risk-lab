@@ -1,0 +1,111 @@
+{
+    "param_registry": {
+        "param_version": "phase2_v1",
+        "raw_user_overrides": {
+            "run": {
+                "start_date": "2025-01-01",
+                "end_date": "2025-01-31",
+                "symbol": "NIFTY",
+                "tenor": "BOTH"
+            },
+            "strategies": {
+                "short_straddle": {
+                    "qty_lots": 2
+                },
+                "bull_call_spread": {
+                    "width_points": 250
+                }
+            }
+        },
+        "effective_configs": {
+            "short_straddle": {
+                "WEEKLY": {
+                    "qty_lots": 2,
+                    "strike_band_n_weekly": 10,
+                    "strike_band_n_monthly": 15,
+                    "max_atm_search_steps": 3,
+                    "liquidity_mode": "OFF",
+                    "min_contracts": 1,
+                    "min_open_int": 1,
+                    "liquidity_percentile": 50,
+                    "exit_rule": "EXPIRY",
+                    "exit_k_days": null,
+                    "fees_bps": 0.0,
+                    "fixed_fee_per_lot": 0.0,
+                    "strike_band_n": 10,
+                    "otm_distance_points": null,
+                    "width_points": null,
+                    "strategy_name": "short_straddle",
+                    "tenor": "WEEKLY",
+                    "param_version": "phase2_v1"
+                },
+                "MONTHLY": {
+                    "qty_lots": 2,
+                    "strike_band_n_weekly": 10,
+                    "strike_band_n_monthly": 15,
+                    "max_atm_search_steps": 3,
+                    "liquidity_mode": "OFF",
+                    "min_contracts": 1,
+                    "min_open_int": 1,
+                    "liquidity_percentile": 50,
+                    "exit_rule": "EXPIRY",
+                    "exit_k_days": null,
+                    "fees_bps": 0.0,
+                    "fixed_fee_per_lot": 0.0,
+                    "strike_band_n": 15,
+                    "otm_distance_points": null,
+                    "width_points": null,
+                    "strategy_name": "short_straddle",
+                    "tenor": "MONTHLY",
+                    "param_version": "phase2_v1"
+                }
+            },
+            "short_strangle": {
+                "WEEKLY": {
+                    "qty_lots": 1,
+                    "strike_band_n_weekly": 10,
+                    "strike_band_n_monthly": 15,
+                    "max_atm_search_steps": 3,
+                    "liquidity_mode": "OFF",
+                    "min_contracts": 1,
+                    "min_open_int": 1,
+                    "liquidity_percentile": 50,
+                    "exit_rule": "EXPIRY",
+                    "exit_k_days": null,
+                    "fees_bps": 0.0,
+                    "fixed_fee_per_lot": 0.0,
+                    "otm_distance_points_weekly": 300,
+                    "otm_distance_points_monthly": 400,
+                    "strike_band_n": 10,
+                    "otm_distance_points": 300,
+                    "width_points": null,
+                    "strategy_name": "short_strangle",
+                    "tenor": "WEEKLY",
+                    "param_version": "phase2_v1"
+                },
+                "MONTHLY": {
+                    "qty_lots": 1,
+                    "strike_band_n_weekly": 10,
+                    "strike_band_n_monthly": 15,
+                    "max_atm_search_steps": 3,
+                    "liquidity_mode": "OFF",
+                    "min_contracts": 1,
+                    "min_open_int": 1,
+                    "liquidity_percentile": 50,
+                    "exit_rule": "EXPIRY",
+                    "exit_k_days": null,
+                    "fees_bps": 0.0,
+                    "fixed_fee_per_lot": 0.0,
+                    "otm_distance_points_weekly": 300,
+                    "otm_distance_points_monthly": 400,
+                    "strike_band_n": 15,
+                    "otm_distance_points": 400,
+                    "width_points": null,
+                    "strategy_name": "short_strangle",
+                    "tenor": "MONTHLY",
+                    "param_version": "phase2_v1"
+                }
+            }
+        }
+    }
+}
