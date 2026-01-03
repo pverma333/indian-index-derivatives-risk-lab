@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
-from typing import Iterable, List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -11,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 _ALLOWED_TENORS = {"WEEKLY", "MONTHLY", "BOTH"}
 
+# We now require opt_*_expiry to map the roll entry_date -> tradable expiry.
 _REQUIRED_COLUMNS = {
     "date",
     "symbol",
@@ -18,24 +18,30 @@ _REQUIRED_COLUMNS = {
     "is_trading_day",
     "is_opt_weekly_expiry",
     "is_opt_monthly_expiry",
+    "opt_weekly_expiry",
+    "opt_monthly_expiry",
 }
 
 
 def build_expiry_cycles(market_df: pd.DataFrame, symbol: str, tenor: str) -> pd.DataFrame:
     """
-    Build deterministic expiry cycles using dataset flags only.
+    Build deterministic trade cycles using dataset flags (Phase 2).
 
-    Rules (Phase 2):
-      - MONTHLY expiry_dt: unique expiry_dt where is_opt_monthly_expiry == True for symbol
-      - WEEKLY expiry_dt: unique expiry_dt where is_opt_weekly_expiry == True for symbol
-      - entry_date: next trading day strictly after expiry_dt (min date > expiry_dt with is_trading_day == True)
-      - exit_date: expiry_dt
-      - drop cycles where entry_date missing; log reason MISSING_ENTRY_DATE with symbol/tenor/expiry_dt
-      - sort by expiry_dt then tenor
+    Key semantics (fix vs old behavior):
+      - Use expiry flags to identify "anchor" expiries (the just-finished series).
+      - entry_date is the next trading day strictly after the anchor expiry_dt.
+      - The *tradable* expiry_dt for entry_date is taken from:
+          WEEKLY  -> opt_weekly_expiry on entry_date
+          MONTHLY -> opt_monthly_expiry on entry_date
+      - exit_date == expiry_dt (Phase 2 exit at expiry).
+      - Drop cycles where entry_date is missing or opt_*_expiry is missing; log reason with context.
+
+    This resolves the real issue you observed: previously, entry_date was after expiry_dt while still
+    trying to trade the expired contract, producing empty chains.
 
     Returns
     -------
-    cycles_df: pd.DataFrame with columns:
+    cycles_df columns:
         symbol, tenor, expiry_dt, entry_date, exit_date
     """
     _validate_inputs(market_df=market_df, symbol=symbol, tenor=tenor)
@@ -44,33 +50,56 @@ def build_expiry_cycles(market_df: pd.DataFrame, symbol: str, tenor: str) -> pd.
         return _empty_cycles_df()
 
     df = market_df.copy()
-
-    # Normalize date columns deterministically (safe even if already datetime64)
     df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.normalize()
     df["expiry_dt"] = pd.to_datetime(df["expiry_dt"], errors="coerce").dt.normalize()
+    df["opt_weekly_expiry"] = pd.to_datetime(df["opt_weekly_expiry"], errors="coerce").dt.normalize()
+    df["opt_monthly_expiry"] = pd.to_datetime(df["opt_monthly_expiry"], errors="coerce").dt.normalize()
 
     df_sym = df.loc[df["symbol"] == symbol].copy()
     if df_sym.empty:
         return _empty_cycles_df()
 
     trading_dates = _get_sorted_trading_dates(df_sym)
-
     tenors_to_build = _expand_tenor(tenor)
+
     rows: List[dict] = []
 
     for tnr in tenors_to_build:
-        expiry_dates = _get_unique_expiry_dates_by_tenor(df_sym, tnr)
-        if len(expiry_dates) == 0:
+        anchor_expiries = _get_unique_anchor_expiry_dates(df_sym, tnr)
+        if len(anchor_expiries) == 0:
             continue
 
-        for exp_dt in expiry_dates:
-            entry_dt = _next_trading_day_after(trading_dates, exp_dt)
+        expiry_ref_col = "opt_weekly_expiry" if tnr == "WEEKLY" else "opt_monthly_expiry"
+
+        for anchor_expiry_dt in anchor_expiries:
+            entry_dt = _next_trading_day_after(trading_dates, anchor_expiry_dt)
             if pd.isna(entry_dt):
                 logger.warning(
-                    "MISSING_ENTRY_DATE drop cycle | symbol=%s tenor=%s expiry_dt=%s",
+                    "MISSING_ENTRY_DATE drop cycle | symbol=%s tenor=%s anchor_expiry_dt=%s",
                     symbol,
                     tnr,
-                    _fmt_date(exp_dt),
+                    _fmt_date(anchor_expiry_dt),
+                )
+                continue
+
+            trade_expiry_dt = _trade_expiry_for_entry_date(df_sym, entry_dt, expiry_ref_col)
+            if pd.isna(trade_expiry_dt):
+                logger.warning(
+                    "MISSING_TRADE_EXPIRY drop cycle | symbol=%s tenor=%s entry_date=%s ref_col=%s",
+                    symbol,
+                    tnr,
+                    _fmt_date(entry_dt),
+                    expiry_ref_col,
+                )
+                continue
+
+            if entry_dt > trade_expiry_dt:
+                logger.warning(
+                    "ENTRY_AFTER_TRADE_EXPIRY drop cycle | symbol=%s tenor=%s entry_date=%s trade_expiry_dt=%s",
+                    symbol,
+                    tnr,
+                    _fmt_date(entry_dt),
+                    _fmt_date(trade_expiry_dt),
                 )
                 continue
 
@@ -78,9 +107,9 @@ def build_expiry_cycles(market_df: pd.DataFrame, symbol: str, tenor: str) -> pd.
                 {
                     "symbol": symbol,
                     "tenor": tnr,
-                    "expiry_dt": exp_dt,
+                    "expiry_dt": trade_expiry_dt,
                     "entry_date": entry_dt,
-                    "exit_date": exp_dt,
+                    "exit_date": trade_expiry_dt,
                 }
             )
 
@@ -88,11 +117,15 @@ def build_expiry_cycles(market_df: pd.DataFrame, symbol: str, tenor: str) -> pd.
         return _empty_cycles_df()
 
     cycles_df = pd.DataFrame(rows, columns=["symbol", "tenor", "expiry_dt", "entry_date", "exit_date"])
+    cycles_df = cycles_df.drop_duplicates()
     cycles_df = cycles_df.sort_values(["expiry_dt", "tenor"], kind="mergesort").reset_index(drop=True)
 
-    # Safety: ensure no null entry_date
     if cycles_df["entry_date"].isna().any():
         raise ValueError("Invariant violated: cycles_df contains null entry_date after drop logic.")
+    if cycles_df["expiry_dt"].isna().any():
+        raise ValueError("Invariant violated: cycles_df contains null expiry_dt after drop logic.")
+    if not (cycles_df["exit_date"] == cycles_df["expiry_dt"]).all():
+        raise ValueError("Invariant violated: exit_date must equal expiry_dt for Phase 2.")
 
     return cycles_df
 
@@ -116,7 +149,7 @@ def _expand_tenor(tenor: str) -> Sequence[str]:
     return (tenor,)
 
 
-def _get_unique_expiry_dates_by_tenor(df_sym: pd.DataFrame, tenor: str) -> np.ndarray:
+def _get_unique_anchor_expiry_dates(df_sym: pd.DataFrame, tenor: str) -> np.ndarray:
     if tenor == "WEEKLY":
         flag_col = "is_opt_weekly_expiry"
     elif tenor == "MONTHLY":
@@ -127,8 +160,7 @@ def _get_unique_expiry_dates_by_tenor(df_sym: pd.DataFrame, tenor: str) -> np.nd
     expiry_series = df_sym.loc[df_sym[flag_col] == True, "expiry_dt"]  # noqa: E712
     expiry_series = expiry_series.dropna().drop_duplicates()
     expiry_dates = pd.to_datetime(expiry_series, errors="coerce").dropna().dt.normalize().unique()
-    expiry_dates = np.sort(expiry_dates)
-    return expiry_dates
+    return np.sort(expiry_dates)
 
 
 def _get_sorted_trading_dates(df_sym: pd.DataFrame) -> np.ndarray:
@@ -138,10 +170,6 @@ def _get_sorted_trading_dates(df_sym: pd.DataFrame) -> np.ndarray:
 
 
 def _next_trading_day_after(sorted_trading_dates: np.ndarray, expiry_dt: pd.Timestamp) -> pd.Timestamp:
-    """
-    Given sorted unique trading dates (datetime64[D]/Timestamp normalized),
-    return the smallest trading date strictly > expiry_dt; NaT if none.
-    """
     if pd.isna(expiry_dt) or sorted_trading_dates.size == 0:
         return pd.NaT
 
@@ -150,6 +178,19 @@ def _next_trading_day_after(sorted_trading_dates: np.ndarray, expiry_dt: pd.Time
     if idx >= sorted_trading_dates.size:
         return pd.NaT
     return pd.Timestamp(sorted_trading_dates[idx]).normalize()
+
+
+def _trade_expiry_for_entry_date(df_sym: pd.DataFrame, entry_dt: pd.Timestamp, col: str) -> pd.Timestamp:
+    s = df_sym.loc[df_sym["date"] == entry_dt, col]
+    if s.empty:
+        return pd.NaT
+
+    vals = pd.to_datetime(s.dropna().unique(), errors="coerce")
+    vals = [pd.Timestamp(v).normalize() for v in vals if not pd.isna(v)]
+    if not vals:
+        return pd.NaT
+
+    return sorted(vals)[0]
 
 
 def _empty_cycles_df() -> pd.DataFrame:
