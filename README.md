@@ -169,3 +169,11 @@ Cycles are skipped (with logs) when no chain exists on entry_date or when liquid
 
 To smoke test short_Straddle on Q1 data run it in repo root - python tests/manual_run_short_straddle_q1_2025.py --tenor BOTH --full-print
 
+BullCallSpreadStrategy emits a 2-leg call debit spread per expiry cycle:
+
+Buy ATM CE, sell OTM CE (ATM + width_points), with deterministic fallback to the nearest available strike above ATM if the exact preferred strike is missing.
+
+Output trades are leg-level and are later expanded by the engine into daily marks, PnL, and risk metrics.
+
+pytest -q tests/test_bull_call_spread.py
+python tests/smoke_test_bull_call_spread_q1_2025.py --tenor BOTH --full-print
