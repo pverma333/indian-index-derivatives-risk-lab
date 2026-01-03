@@ -1,0 +1,38 @@
+{
+    "table": "trades_df",
+    "grain": [
+        "strategy_name",
+        "tenor",
+        "trade_id",
+        "leg_id"
+    ],
+    "description": "Leg-level trade instructions for Phase 2 engine (one row per option leg).",
+    "required_columns": [
+        "strategy_name",
+        "tenor",
+        "trade_id",
+        "leg_id",
+        "symbol",
+        "instrument",
+        "expiry_dt",
+        "strike_pr",
+        "option_typ",
+        "side",
+        "qty_lots",
+        "entry_date",
+        "exit_date",
+        "strike_band_n",
+        "width_points",
+        "otm_distance_points",
+        "max_atm_search_steps",
+        "liquidity_mode",
+        "min_contracts",
+        "min_open_int",
+        "liquidity_percentile",
+        "exit_rule",
+        "exit_k_days",
+        "fees_bps",
+        "fixed_fee_per_lot",
+        "strike_interval_used"
+    ]
+}

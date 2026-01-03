@@ -106,6 +106,8 @@ Added pytest coverage for monthly, weekly, and missing-entry drop cases
 Added src/strategies/expiry_selectors.py:build_expiry_cycles() implementing Phase 2 expiry-cycle construction using dataset flags only.
 Added pytest coverage for monthly, weekly, and missing entry-date drop behavior (including log assertions).
 Tested with pytest -q tests/test_expiry_selectors.py.
+Smoke test with python tests/smoke_test_expiry_cycles_q1_2025.py --symbol NIFTY --tenor BOTH --max_print 10
+
 
 
 DEVLOG entry
@@ -121,3 +123,11 @@ Added src/strategies/trade_schema.py with TradeSchemaError + validate_trades_df.
 Added tests covering missing columns, duplicate leg_id fail-fast, invalid side, and bad tenor.
 
 Tested via pytest -q.
+
+Added deterministic short straddle trade generation:
+
+Uses Phase 2 cycle builder and contract selectors for chain extraction, strike banding, liquidity filtering, and ATM selection.
+
+Emits schema-validator-compatible selection parameter columns, plus strike_interval_used.
+
+Added 3 unit tests covering: 2-legs-per-trade, unique leg ids, and skip-on-empty-chain.

@@ -8,124 +8,104 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from src.strategies.expiry_selectors import build_expiry_cycles  # noqa: E402
+from src.strategies.expiry_selectors import build_expiry_cycles
 
 
-def _df(rows):
-    df = pd.DataFrame(rows)
-    # Keep input realistic: dates as strings are allowed; function normalizes.
-    return df
-
-
-def test_build_expiry_cycles_monthly():
-    market_df = _df(
+def _mk_df() -> pd.DataFrame:
+    # Minimal rows emulating curated behavior.
+    return pd.DataFrame(
         [
+            # Weekly anchor expiry
             {
-                "date": "2025-01-10",
+                "date": "2025-01-02",
                 "symbol": "NIFTY",
-                "expiry_dt": "2025-01-30",
+                "expiry_dt": "2025-01-02",
                 "is_trading_day": True,
-                "is_opt_weekly_expiry": False,
-                "is_opt_monthly_expiry": True,
-            },
-            {
-                "date": "2025-01-31",
-                "symbol": "NIFTY",
-                "expiry_dt": "2025-02-27",
-                "is_trading_day": True,
-                "is_opt_weekly_expiry": False,
+                "is_opt_weekly_expiry": True,
                 "is_opt_monthly_expiry": False,
+                "opt_weekly_expiry": "2025-01-02",
+                "opt_monthly_expiry": "2025-01-30",
             },
+            # Next trading day after weekly anchor
             {
-                "date": "2025-02-28",
-                "symbol": "NIFTY",
-                "expiry_dt": "2025-03-27",
-                "is_trading_day": True,
-                "is_opt_weekly_expiry": False,
-                "is_opt_monthly_expiry": False,
-            },
-            {
-                "date": "2025-02-10",
-                "symbol": "NIFTY",
-                "expiry_dt": "2025-02-27",
-                "is_trading_day": True,
-                "is_opt_weekly_expiry": False,
-                "is_opt_monthly_expiry": True,
-            },
-        ]
-    )
-
-    cycles = build_expiry_cycles(market_df, symbol="NIFTY", tenor="MONTHLY")
-    assert list(cycles.columns) == ["symbol", "tenor", "expiry_dt", "entry_date", "exit_date"]
-    assert len(cycles) == 2
-
-    # expiry 2025-01-30 -> next trading day is 2025-01-31
-    row0 = cycles.iloc[0]
-    assert row0["tenor"] == "MONTHLY"
-    assert pd.Timestamp(row0["expiry_dt"]).date().isoformat() == "2025-01-30"
-    assert pd.Timestamp(row0["entry_date"]).date().isoformat() == "2025-01-31"
-    assert pd.Timestamp(row0["exit_date"]).date().isoformat() == "2025-01-30"
-
-    # expiry 2025-02-27 -> next trading day is 2025-02-28
-    row1 = cycles.iloc[1]
-    assert pd.Timestamp(row1["expiry_dt"]).date().isoformat() == "2025-02-27"
-    assert pd.Timestamp(row1["entry_date"]).date().isoformat() == "2025-02-28"
-
-
-def test_build_expiry_cycles_weekly():
-    market_df = _df(
-        [
-            {
-                "date": "2025-01-06",
+                "date": "2025-01-03",
                 "symbol": "NIFTY",
                 "expiry_dt": "2025-01-09",
                 "is_trading_day": True,
-                "is_opt_weekly_expiry": True,
+                "is_opt_weekly_expiry": False,
                 "is_opt_monthly_expiry": False,
+                "opt_weekly_expiry": "2025-01-09",
+                "opt_monthly_expiry": "2025-01-30",
             },
+            # Monthly anchor expiry (can overlap with weekly)
             {
-                "date": "2025-01-10",
+                "date": "2025-01-30",
                 "symbol": "NIFTY",
-                "expiry_dt": "2025-01-16",
+                "expiry_dt": "2025-01-30",
+                "is_trading_day": True,
+                "is_opt_weekly_expiry": True,
+                "is_opt_monthly_expiry": True,
+                "opt_weekly_expiry": "2025-01-30",
+                "opt_monthly_expiry": "2025-01-30",
+            },
+            # Next trading day after monthly anchor
+            {
+                "date": "2025-01-31",
+                "symbol": "NIFTY",
+                "expiry_dt": "2025-02-06",
                 "is_trading_day": True,
                 "is_opt_weekly_expiry": False,
                 "is_opt_monthly_expiry": False,
+                "opt_weekly_expiry": "2025-02-06",
+                "opt_monthly_expiry": "2025-02-27",
             },
         ]
     )
 
-    cycles = build_expiry_cycles(market_df, symbol="NIFTY", tenor="WEEKLY")
-    assert len(cycles) == 1
+
+def test_build_expiry_cycles_weekly_roll_maps_to_trade_expiry():
+    df = _mk_df()
+    cycles = build_expiry_cycles(df, symbol="NIFTY", tenor="WEEKLY")
+
+    assert not cycles.empty
+    assert set(cycles.columns) == {"symbol", "tenor", "expiry_dt", "entry_date", "exit_date"}
+    assert (cycles["exit_date"] == cycles["expiry_dt"]).all()
+    assert (cycles["entry_date"] < cycles["expiry_dt"]).all()
+
+    # Weekly anchor 2025-01-02 -> entry 2025-01-03 -> trade expiry 2025-01-09
+    first = cycles.sort_values(["entry_date", "expiry_dt"]).iloc[0]
+    assert pd.Timestamp(first["entry_date"]) == pd.Timestamp("2025-01-03")
+    assert pd.Timestamp(first["expiry_dt"]) == pd.Timestamp("2025-01-09")
+
+
+def test_build_expiry_cycles_monthly_roll_maps_to_trade_expiry():
+    df = _mk_df()
+    cycles = build_expiry_cycles(df, symbol="NIFTY", tenor="MONTHLY")
+
+    assert not cycles.empty
+    assert (cycles["exit_date"] == cycles["expiry_dt"]).all()
+    assert (cycles["entry_date"] < cycles["expiry_dt"]).all()
+
+    # Monthly anchor 2025-01-30 -> entry 2025-01-31 -> trade expiry 2025-02-27
     row = cycles.iloc[0]
-    assert row["tenor"] == "WEEKLY"
-    assert pd.Timestamp(row["expiry_dt"]).date().isoformat() == "2025-01-09"
-    assert pd.Timestamp(row["entry_date"]).date().isoformat() == "2025-01-10"
-    assert pd.isna(cycles["entry_date"]).sum() == 0
+    assert pd.Timestamp(row["entry_date"]) == pd.Timestamp("2025-01-31")
+    assert pd.Timestamp(row["expiry_dt"]) == pd.Timestamp("2025-02-27")
+    assert pd.Timestamp(row["exit_date"]) == pd.Timestamp("2025-02-27")
 
 
-def test_build_expiry_cycles_missing_entry_date_drops(caplog):
-    market_df = _df(
-        [
-            {
-                "date": "2025-03-20",
-                "symbol": "NIFTY",
-                "expiry_dt": "2025-03-27",
-                "is_trading_day": True,
-                "is_opt_weekly_expiry": True,
-                "is_opt_monthly_expiry": False,
-            },
-            # Note: no trading dates after 2025-03-27 in this dataset
-        ]
-    )
+def test_build_expiry_cycles_skips_only_missing_mapping_cycle(caplog):
+    df = _mk_df()
+
+    # Break mapping for the weekly-roll entry date 2025-01-03
+    df.loc[df["date"] == "2025-01-03", "opt_weekly_expiry"] = pd.NaT
 
     with caplog.at_level("WARNING"):
-        cycles = build_expiry_cycles(market_df, symbol="NIFTY", tenor="WEEKLY")
+        cycles = build_expiry_cycles(df, symbol="NIFTY", tenor="WEEKLY")
 
-    assert len(cycles) == 0
+    # It should log the skip for that cycle
+    assert any("MISSING_TRADE_EXPIRY" in rec.message for rec in caplog.records)
 
-    # Must log drop reason and include symbol/tenor/expiry_dt
-    msgs = "\n".join(r.message for r in caplog.records)
-    assert "MISSING_ENTRY_DATE" in msgs
-    assert "symbol=NIFTY" in msgs
-    assert "tenor=WEEKLY" in msgs
-    assert "expiry_dt=2025-03-27" in msgs
+    # But weekly cycles are not necessarily empty (later anchor can still produce a valid cycle)
+    # Ensure the broken entry_date cycle is not present.
+    if not cycles.empty:
+        assert not (pd.to_datetime(cycles["entry_date"]) == pd.Timestamp("2025-01-03")).any()

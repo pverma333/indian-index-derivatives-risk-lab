@@ -159,3 +159,13 @@ entry_date <= exit_date
 tenor ∈ {WEEKLY,MONTHLY}, liquidity_mode ∈ {OFF,ABSOLUTE,PERCENTILE}
 
 nullable: width_points, otm_distance_points, exit_k_days (unless K-days rule)
+
+
+ShortStraddleStrategy.build_trades(market_df, cfg) produces a leg-level trades dataframe for Phase 2 engine consumption.
+
+Each expiry cycle produces exactly two short option legs at the selected ATM strike (CE + PE).
+
+Cycles are skipped (with logs) when no chain exists on entry_date or when liquidity/selection prevents finding an ATM strike with both CE and PE.
+
+To smoke test short_Straddle on Q1 data run it in repo root - python tests/manual_run_short_straddle_q1_2025.py --tenor BOTH --full-print
+

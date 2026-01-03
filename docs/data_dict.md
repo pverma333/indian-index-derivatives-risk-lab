@@ -422,3 +422,38 @@ Important date / field consideration
 | otm_distance_points         |    int |    yes   | Strangle distance (strangle only)                               |
 | otm_distance_points_weekly  |    int |    yes   | Present for short_strangle (input to derived)                   |
 | otm_distance_points_monthly |    int |    yes   | Present for short_strangle (input to derived)                   |
+
+
+
+
+trade_df Schema
+| Column               |           Type | Nullable | Meaning                                                   |
+| -------------------- | -------------: | :------: | --------------------------------------------------------- |
+| strategy_name        |            str |    no    | `"short_straddle"`                                        |
+| tenor                |            str |    no    | `WEEKLY` or `MONTHLY`                                     |
+| trade_id             |            str |    no    | Identifies the cycle-level trade (shared by both legs)    |
+| leg_id               |            str |    no    | Unique identifier per leg across entire `trades_df`       |
+| symbol               |            str |    no    | Underlying index symbol (e.g., NIFTY)                     |
+| instrument           |            str |    no    | `"OPTIDX"`                                                |
+| expiry_dt            | datetime64[ns] |    no    | Contract expiry date                                      |
+| strike_pr            |          float |    no    | Selected ATM strike price                                 |
+| option_typ           |            str |    no    | `CE` or `PE`                                              |
+| side                 |            int |    no    | `-1` for both legs (short)                                |
+| qty_lots             |            int |    no    | Number of lots (`>= 1`)                                   |
+| entry_date           | datetime64[ns] |    no    | Cycle entry date (from cycle builder)                     |
+| exit_date            | datetime64[ns] |    no    | Cycle exit date (Phase 2: expiry)                         |
+| strike_band_n        |            int |    no    | Strike band half-width used for filtering                 |
+| width_points         |      int/float |    yes   | Nullable for non-spreads (kept for schema consistency)    |
+| otm_distance_points  |      int/float |    yes   | Nullable for non-strangles (kept for schema consistency)  |
+| max_atm_search_steps |            int |    no    | ATM fallback search steps                                 |
+| liquidity_mode       |            str |    no    | `OFF`, `ABSOLUTE`, or `PERCENTILE`                        |
+| min_contracts        |            int |    no    | ABSOLUTE liquidity threshold                              |
+| min_open_int         |            int |    no    | ABSOLUTE liquidity threshold                              |
+| liquidity_percentile |            int |    no    | Percentile (used when mode is PERCENTILE)                 |
+| exit_rule            |            str |    no    | `EXPIRY` in Phase 2                                       |
+| exit_k_days          |            int |    yes   | Nullable (reserved for later phases)                      |
+| fees_bps             |          float |    no    | Stored for later fee application                          |
+| fixed_fee_per_lot    |          float |    no    | Stored for later fee application                          |
+| strike_interval_used |            int |    yes   | Inferred strike spacing from the entry-date chain         |
+
+
