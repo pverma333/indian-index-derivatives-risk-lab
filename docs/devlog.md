@@ -146,3 +146,5 @@ tests for leg correctness and fallback behavior
 Added short strangle strategy with deterministic OTM fallback on both sides.
 
 Added tests for 2-leg emission and fallback tie-breaking.
+
+Added bear put spread strategy + tests validating legs and fallback-below behavior.

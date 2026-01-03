@@ -191,3 +191,9 @@ short OTM PE at ATM - otm_distance_points (fallback nearest below ATM)
 pytest -q tests/test_short_strangle.py
 python tests/smoke_test_short_strangle_q1_2025.py --tenor BOTH --full-print
 
+BearPutSpreadStrategy emits 2 put legs per cycle:
+
+
+Buy ATM PE
+Sell OTM PE at ATM - width_points, with deterministic fallback to nearest available strike below ATM when exact strike missing.
+pytest -q tests/test_bear_put_spread.py
