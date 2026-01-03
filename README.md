@@ -177,3 +177,17 @@ Output trades are leg-level and are later expanded by the engine into daily mark
 
 pytest -q tests/test_bull_call_spread.py
 python tests/smoke_test_bull_call_spread_q1_2025.py --tenor BOTH --full-print
+
+
+
+README snippet
+
+ShortStrangleStrategy emits 2 short legs per cycle:
+
+short OTM CE at ATM + otm_distance_points (fallback nearest above ATM)
+
+short OTM PE at ATM - otm_distance_points (fallback nearest below ATM)
+
+pytest -q tests/test_short_strangle.py
+python tests/smoke_test_short_strangle_q1_2025.py --tenor BOTH --full-print
+
