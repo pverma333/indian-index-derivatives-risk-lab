@@ -142,3 +142,7 @@ OTM call strike selection with deterministic fallback above ATM
 stored width_points and strike_interval_used
 
 tests for leg correctness and fallback behavior
+
+Added short strangle strategy with deterministic OTM fallback on both sides.
+
+Added tests for 2-leg emission and fallback tie-breaking.
