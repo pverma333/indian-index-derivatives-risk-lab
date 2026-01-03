@@ -131,3 +131,14 @@ Uses Phase 2 cycle builder and contract selectors for chain extraction, strike b
 Emits schema-validator-compatible selection parameter columns, plus strike_interval_used.
 
 Added 3 unit tests covering: 2-legs-per-trade, unique leg ids, and skip-on-empty-chain.
+
+
+Added bull call spread strategy with:
+
+chain → strike band → liquidity filter → ATM selection
+
+OTM call strike selection with deterministic fallback above ATM
+
+stored width_points and strike_interval_used
+
+tests for leg correctness and fallback behavior
