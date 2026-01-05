@@ -1,0 +1,270 @@
+{
+    "title": "engine_pnl skips_df (CSV rows)",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "strategy_name": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "tenor": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "MONTHLY",
+                            "WEEKLY"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "trade_id": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "leg_id": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "symbol": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "instrument": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "OPTIDX"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "expiry_dt": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "strike_pr": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "option_typ": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "CE",
+                            "PE"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "entry_date": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "exit_date": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "market_max_date": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "as_of_date_used": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "end_date_used": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "coverage_mode": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "STRICT"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "reason": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "MARKET_WINDOW_END_BEFORE_EXIT_STRICT"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "details": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            }
+        },
+        "required": [
+            "strategy_name",
+            "tenor",
+            "trade_id",
+            "leg_id",
+            "symbol",
+            "instrument",
+            "expiry_dt",
+            "strike_pr",
+            "option_typ",
+            "entry_date",
+            "exit_date",
+            "market_max_date",
+            "as_of_date_used",
+            "end_date_used",
+            "coverage_mode",
+            "reason",
+            "details"
+        ]
+    }
+}
