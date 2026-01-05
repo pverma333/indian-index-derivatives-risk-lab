@@ -1,0 +1,464 @@
+{
+    "title": "engine_pnl --> legs_pnl_df (CSV rows)",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "date": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "strategy_name": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "tenor": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "MONTHLY",
+                            "WEEKLY"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "trade_id": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "leg_id": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "symbol": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "instrument": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "OPTIDX"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "expiry_dt": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "strike_pr": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "option_typ": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "CE",
+                            "PE"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "side": {
+                "type": "integer",
+                "enum": [
+                    -1,
+                    1
+                ]
+            },
+            "qty_lots": {
+                "type": "integer"
+            },
+            "lot_size": {
+                "type": "integer"
+            },
+            "units": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "entry_date": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "exit_date": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "entry_price": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "settle_used": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "settle_prev_used": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "mtm_pnl": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "gap_risk_pnl_proxy": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "gap_method": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "price_method": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "rate_91d": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "rate_182d": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "rate_364d": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "vix_close": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "contracts": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "open_int": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "chg_in_oi": {
+                "anyOf": [
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "market_max_date": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "as_of_date_used": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "end_date_used": {
+                "anyOf": [
+                    {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date"
+                            },
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "is_open": {
+                "type": "boolean"
+            },
+            "status": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "CLOSED"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            },
+            "coverage_mode": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "enum": [
+                            "STRICT"
+                        ]
+                    },
+                    {
+                        "type": "null"
+                    }
+                ]
+            }
+        },
+        "required": [
+            "date",
+            "strategy_name",
+            "tenor",
+            "trade_id",
+            "leg_id",
+            "symbol",
+            "instrument",
+            "expiry_dt",
+            "strike_pr",
+            "option_typ",
+            "side",
+            "qty_lots",
+            "lot_size",
+            "units",
+            "entry_date",
+            "exit_date",
+            "entry_price",
+            "settle_used",
+            "settle_prev_used",
+            "mtm_pnl",
+            "gap_risk_pnl_proxy",
+            "gap_method",
+            "price_method",
+            "rate_91d",
+            "rate_182d",
+            "rate_364d",
+            "vix_close",
+            "contracts",
+            "open_int",
+            "chg_in_oi",
+            "market_max_date",
+            "as_of_date_used",
+            "end_date_used",
+            "is_open",
+            "status",
+            "coverage_mode"
+        ]
+    }
+}

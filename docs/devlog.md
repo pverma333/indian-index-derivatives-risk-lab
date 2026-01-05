@@ -148,3 +148,28 @@ Added short strangle strategy with deterministic OTM fallback on both sides.
 Added tests for 2-leg emission and fallback tie-breaking.
 
 Added bear put spread strategy + tests validating legs and fallback-below behavior.
+
+
+Added core engine PnL computation with:
+
+Day-0 settle_prev_used anchor
+
+MTM PnL
+
+Gap-risk proxy (intrinsic-open for options; index-open for futures)
+
+Skip-on-missing-market-rows behavior with logged context
+
+Unit tests for anchoring + gap proxy formulas
+
+Implemented ASOF/STRICT coverage handling in P&L engine:
+
+Engine computes market_max_date, as_of_date_used, and end_date_used per leg.
+
+ASOF emits partial legs as OPEN without skipping solely due to insufficient future coverage.
+
+STRICT skips legs when market_max_date < exit_date.
+
+Added deterministic skips_df output.
+
+Added unit tests for day-0 anchoring, gap proxies, OPEN/CLOSED labeling, capped expected-dates logic, STRICT skip rule, and skip schema.

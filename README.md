@@ -197,3 +197,26 @@ BearPutSpreadStrategy emits 2 put legs per cycle:
 Buy ATM PE
 Sell OTM PE at ATM - width_points, with deterministic fallback to nearest available strike below ATM when exact strike missing.
 pytest -q tests/test_bear_put_spread.py
+python tests/smoke_test_bear_put_spread_q1_2025.py --tenor WEEKLY --width_points 225 --full-print
+
+
+
+README snippet (add under “Engine / P&L”)
+
+compute_legs_pnl(market_df, trades_df, coverage_mode="ASOF", as_of_date=None) -> (legs_pnl_df, skips_df)
+
+coverage_mode="ASOF": never skip due solely to market window ending before exit_date; instead label leg OPEN and value to end_date_used
+
+coverage_mode="STRICT": skip if market_max_date < exit_date with reason MARKET_WINDOW_END_BEFORE_EXIT_STRICT
+
+Different scripts for engine pnl smoke testing -
+
+python tests/smoke_test_engine_pnl_q1_2025.py \
+  --path data/curated/derivatives_clean_Q1_2025.csv \
+  --coverage-mode ASOF \
+  --outdir data/derived/smoke/engine_pnl_q1_2025
+
+python tests/smoke_test_engine_pnl_q1_2025.py \
+  --path data/curated/derivatives_clean_Q1_2025.csv \
+  --coverage-mode STRICT \
+  --outdir data/derived/smoke/engine_pnl_q1_2025_strict
