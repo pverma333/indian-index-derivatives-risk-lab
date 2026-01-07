@@ -256,3 +256,15 @@ python -m src.run_phase2_backtests \
   --strategies short_straddle,short_strangle \
   --coverage-mode ASOF \
   --outdir data/output/phase2/20260107_asof_run
+
+
+README snippet (add under “Phase 2 – Testing”)
+
+Integration smoke test:
+
+tests/test_phase2_end_to_end_asof_vs_strict_smoke.py
+
+Runs Phase 2 twice (ASOF + STRICT) on curated Q1-2025 dataset and asserts OPEN leg handling, deterministic STRICT skips, reconciliation, Day-0 anchor, and artifact-driven manifest counts.
+
+pytest -q tests/test_phase2_end_to_end_asof_vs_strict_smoke.py
+

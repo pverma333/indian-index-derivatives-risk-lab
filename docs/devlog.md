@@ -200,3 +200,14 @@ Added unit tests for day-0 anchoring, gap proxies, OPEN/CLOSED labeling, capped 
 - Manifest and counts are derived from saved artifacts only (no log parsing).
 - ASOF runs complete even when user end_date exceeds market coverage by capping to `market_max_date`.
 
+
+
+DEVLOG entry
+
+Added Phase 2 end-to-end smoke test to prevent regressions:
+
+ASOF must emit OPEN legs when end_date < exit_date
+
+STRICT must skip incomplete lifecycle legs with reason MARKET_WINDOW_END_BEFORE_EXIT_STRICT
+
+Manifest counts validated against legs_pnl_df / skips_df artifacts (no log-derived counts)
