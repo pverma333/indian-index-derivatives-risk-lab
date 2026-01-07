@@ -220,3 +220,39 @@ python tests/smoke_test_engine_pnl_q1_2025.py \
   --path data/curated/derivatives_clean_Q1_2025.csv \
   --coverage-mode STRICT \
   --outdir data/derived/smoke/engine_pnl_q1_2025_strict
+
+## Phase 2 Backtests Runner (ASOF/STRICT)
+
+The Phase 2 runner produces dashboard-safe artifacts by wiring a deterministic ASOF date into the engine,
+persisting `skips_df`, generating realized vs unrealized positions, and writing a run manifest derived
+only from saved artifacts (not logs).
+
+### Key concepts
+
+- `market_max_date`:
+  Computed from the symbol-filtered market dataset BEFORE applying the run window.
+- `as_of_date_used`:
+  The date actually used for valuation:
+  - If `--as-of-date` is provided: `min(as_of_date, market_max_date)`
+  - Else if `--end-date` is provided: `min(end_date, market_max_date)`
+  - Else: `market_max_date`
+
+### Coverage modes
+
+- `ASOF` (default):
+  OPEN legs are emitted when the leg’s exit is beyond `as_of_date_used`.
+- `STRICT`:
+  Legs that require market coverage beyond the available market window are skipped and appear in `skips_df`.
+
+### CLI usage
+
+```bash
+python -m src.run_phase2_backtests \
+  --path data/curated/derivatives_clean.parquet \
+  --symbol NIFTY \
+  --start-date 2025-01-01 \
+  --end-date 2025-03-31 \
+  --tenor BOTH \
+  --strategies short_straddle,short_strangle \
+  --coverage-mode ASOF \
+  --outdir data/output/phase2/20260107_asof_run

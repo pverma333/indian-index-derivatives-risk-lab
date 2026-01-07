@@ -173,3 +173,30 @@ STRICT skips legs when market_max_date < exit_date.
 Added deterministic skips_df output.
 
 Added unit tests for day-0 anchoring, gap proxies, OPEN/CLOSED labeling, capped expected-dates logic, STRICT skip rule, and skip schema.
+
+
+### DEVLOG entry (append to your `DEVLOG.md`)
+
+```md
+## 2026-01-07 — Phase 2 runner dashboard-safe ASOF wiring + positions + manifest (Ticket 10)
+
+### Added
+- Deterministic ASOF wiring in Phase 2 runner:
+  - compute `market_max_date` from symbol-filtered market_df before date filtering
+  - compute `as_of_date_used` bounded by `market_max_date`
+  - filter market_df to `[start_date, as_of_date_used]`
+  - pass `coverage_mode` and `as_of_date_used` into `compute_legs_pnl(...)`
+- New artifact: `positions_df.parquet`
+  - leg-level positions summary with realized vs unrealized P&L split using leg `status`
+- New artifact: `run_manifest.json`
+  - artifact-derived run summary with counts and skips_by_reason computed from `skips_df`
+  - reconciliation sanity totals
+
+### Changed
+- Aggregations now preserve ASOF metadata (`market_max_date`, `as_of_date_used`, `coverage_mode`)
+  and include counts (`n_open_legs`, `n_closed_legs`, `n_skipped_legs`) derived from artifacts.
+
+### Notes
+- Manifest and counts are derived from saved artifacts only (no log parsing).
+- ASOF runs complete even when user end_date exceeds market coverage by capping to `market_max_date`.
+
